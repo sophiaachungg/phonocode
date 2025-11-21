@@ -62,7 +62,9 @@ This project compares two strong ASR backbones:
 
 ### 2.1 Wav2Vec 2.0
 
-[insert image of model architecture here]
+![Wav2Vec 2.0 Model Architecture](figures/wav2vec2_architecture.png)
+
+*Figure 1. Wav2Vec 2.0 Model Architecture from Baevski et al., 2020*
 
 - **Self-supervised** transformer encoder trained directly on raw waveforms.
 - Uses a CNN feature encoder → masks portions of latent features → Transformer context network → contrastive loss over **quantized speech units**.  
@@ -72,7 +74,9 @@ In our pipeline, Wav2Vec 2.0 is used **off-the-shelf** (no additional fine-tunin
 
 ### 2.2 WavLM
 
-[insert image of model architecture here]
+![WavLM Model Architecture](figures/wavlm_architecture.png)
+
+*Figure 2. WavLM Model Architecture from Chen et al., 2022*
 
 - Built on the Wav2Vec 2.0 / HuBERT family but optimized as a **general-purpose speech representation** model for a wide range of tasks (SUPERB benchmark).  
 - Adds structured denoising and additional pretraining data (MIX-94k) to better capture speaker, background and other acoustic information.  
@@ -96,7 +100,11 @@ Steps:
 
 ![Model Accuracy Per Participant](figures/off_the_shelf_model_acc.png)
 
+*Figure 3. Off-the-shelf model accuracy per participant is unremarkable.*
+
 ![Per Item Accuracy](figures/off_the_shelf_per_item_accuracy.png)
+
+*Figure 4. Off-the-shelf model accuracy per task item. Correct answers are anonymized. Diagonal line indicates equal performance between models.*
 
 What we see:
 
@@ -122,7 +130,11 @@ Pipeline:
 
 ![WavLM MLP Learning Curves](figures/wavlm_mlp_learning_curves.png)
 
+*Figure 5. WavLM MLP Learning Curves show overfitting.*
+
 ![Wav2Vec 2.0 MLP Learning Curves](figures/wav2vec2_mlp_learning_curves.png)
+
+*Figure 6. Wav2Vec 2.0 MLP Learning Curves also show overfitting but promising for next iteration.*
 
 Empirical takeaway (pilot):
 
