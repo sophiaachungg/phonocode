@@ -55,43 +55,22 @@ Self-supervised and weakly-supervised transformer models (Whisper, Wav2Vec 2.0, 
 
 ## 2. Models compared
 
-This project compares three strong ASR backbones:
+This project compares two strong ASR backbones:
 
-- **Whisper** – large-scale weakly supervised encoder–decoder model.
 - **Wav2Vec 2.0** – self-supervised encoder trained with a contrastive objective on quantized latent speech.
 - **WavLM** – Wav2Vec 2.0 / HuBERT-style encoder optimized for a broad “full stack” of speech tasks.
 
-### 2.1 Whisper
-
-[insert image of model architecture here]
-
-- Transformer encoder–decoder trained on **680k+ hours** of weakly supervised multilingual speech (web audio + noisy transcripts).:contentReference[oaicite:1]{index=1}  
-- Does **ASR, translation, language ID, and more** in a single multitask model.:contentReference[oaicite:2]{index=2}  
-- Strong zero-shot performance and **robustness to noise and accents** without task-specific fine-tuning.:contentReference[oaicite:3]{index=3}  
-
-In this project, Whisper is used **out-of-the-box** as a baseline: we transcribe each response and then try to classify correctness using regex and string matching on the transcript.
-
-**Pros for this task**
-
-- Very good transcription quality on noisy, real-world audio.
-- No training needed to get started.
-
-**Cons for this task**
-
-- It always outputs *some* word, even when the participant response is incomplete or non-target.
-- Homophones and near-misses (“an” vs “Anne”, “put” vs “putt”) can confuse any purely text-based scoring rule.
-
-### 2.2 Wav2Vec 2.0
+### 2.1 Wav2Vec 2.0
 
 [insert image of model architecture here]
 
 - **Self-supervised** transformer encoder trained directly on raw waveforms.
 - Uses a CNN feature encoder → masks portions of latent features → Transformer context network → contrastive loss over **quantized speech units**.  
-- Extremely **label-efficient**: with only 10 minutes of labeled Librispeech data, it reaches WER 4.8 / 8.2 (test-clean / test-other), and with full data it achieves state-of-the-art WER while using far less labeled data than previous approaches.:contentReference[oaicite:5]{index=5}  
+- Extremely **label-efficient**: with only 10 minutes of labeled Librispeech data, it reaches WER 4.8 / 8.2 (test-clean / test-other), and with full data it achieves state-of-the-art WER while using far less labeled data than previous approaches.
 
-In our pipeline, Wav2Vec 2.0 is used as a **frozen encoder**: we extract embeddings for each audio file and train a small classifier head to predict correct (1) vs incorrect (0).
+In our pipeline, Wav2Vec 2.0 is used **off-the-shelf** (no additional fine-tuning) as a baseline and as a **frozen encoder**: we extract embeddings for each audio file and train a small classifier head to predict correct (1) vs incorrect (0).
 
-### 2.3 WavLM
+### 2.2 WavLM
 
 [insert image of model architecture here]
 
@@ -99,30 +78,32 @@ In our pipeline, Wav2Vec 2.0 is used as a **frozen encoder**: we extract embeddi
 - Adds structured denoising and additional pretraining data (MIX-94k) to better capture speaker, background and other acoustic information.  
 - Achieves **SOTA or near-SOTA results** across tasks like speech separation, speaker verification, diarization, and ASR.  
 
-We again use WavLM as a **frozen encoder** plus a small classifier head, and compare performance to Wav2Vec 2.0 on the same splits.
-
----
+We again use WavLM both **off-the-shelf** as a **frozen encoder** plus a small classifier head, and compare performance to Wav2Vec 2.0 on the same splits.
 
 ## 3. Experimental design
 
-### 3.1 Phase 1 – Out-of-the-box models + regex / fuzzy matching
+### 3.1 Phase 1 – Out-the-shelf models + regex / fuzzy matching
 
 Main idea: **“What if we just use off-the-shelf ASR and some string matching?”**
 
 Steps:
 
-1. Run Whisper (and optionally other ASR models) to **transcribe** each response.
+1. Run WavLM and Wav2Vec 2.0 to **transcribe** each response.
 2. Use **regex + fuzzy string matching** to decide if the transcript matches:
    - The expected reversed word.
    - A set of acceptable variants / spellings.
 3. Evaluate against the manually coded ground truth (0/1).
 
+![Model Accuracy Per Participant](figures/off_the_shelf_model_acc.png)
+
+![Per Item Accuracy](figures/off_the_shelf_per_item_accuracy.png)
+
 What we see:
 
 - Works *okay* for clean, clear productions.
 - **Homophones** are a major problem (e.g., orthographic ambiguity).
-- ASR tends to **snap uncertain pronunciations to the nearest common word**, which can look “correct” in text even if the participant’s production is off.
-- We’d still need humans to manually inspect borderline / noisy cases, so it doesn’t actually save that much RA time.
+- It always outputs *some* word, even when the participant response is incomplete or non-target (“an” vs “Anne”, “put” vs “putt”).
+- We’d still need humans to manually inspect borderline / noisy cases, so it doesn’t actually save that much time.
 
 Conclusion: this is a reasonable baseline, but **purely transcript-based scoring is not enough** for this task.
 
@@ -139,12 +120,17 @@ Pipeline:
 3. Train a small classifier head (e.g., logistic regression or a tiny MLP) on top of these embeddings to predict **0/1**.
 4. Use **participant-grouped splits** so speakers in the test set are unseen during training.
 
+![WavLM MLP Learning Curves](figures/wavlm_mlp_learning_curves.png)
+
+![Wav2Vec 2.0 MLP Learning Curves](figures/wav2vec2_mlp_learning_curves.png)
+
 Empirical takeaway (pilot):
 
 - For this phoneme-reversal classification task:
   - **Wav2Vec 2.0 features separated “correct” vs “incorrect”** responses more cleanly; the classifier generalized better to new participants.
   - **WavLM features tended to overfit speakers** more in this setup, with weaker generalization at this small data scale.
 - In other words, **for this specific task and dataset size, “frozen Wav2Vec 2.0 + small head” beat “frozen WavLM + same head”**, despite WavLM’s stronger performance on broad benchmarks.
+- Bonus: the homophone problem from earlier disappears!
 
 Given the current tiny dataset and simple head, **Wav2Vec 2.0 was an easier representation space for the classifier** to carve out a good decision boundary.
 
