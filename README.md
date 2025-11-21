@@ -183,6 +183,5 @@ Longer-term:
 
 ## 5. References
 
-- **Whisper** – Radford et al., *Robust Speech Recognition via Large-Scale Weak Supervision*, ICML 2023. 
 - **Wav2Vec 2.0** – Baevski et al., *Wav2Vec 2.0: A Framework for Self-Supervised Learning of Speech Representations*, NeurIPS 2020.  
 - **WavLM** – Chen et al., *WavLM: Large-Scale Self-Supervised Pre-Training for Full Stack Speech Processing*, IEEE/ACM TASLP 2022.  
