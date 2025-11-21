@@ -1,6 +1,6 @@
 # PhonoCode: Transformer-Based Scoring of Phonological Tasks
 
-This repo contains code for experimenting with transformer-based speech models (e.g., Whisper, Wav2Vec2, WavLM) to *automatically score* phonological task responses.  
+This repo contains code for experimenting with transformer-based speech models (e.g., Wav2Vec2, WavLM) to *automatically score* phonological task responses.  
 Each audio clip is classified as **correct (1)** or **incorrect (0)**.
 
 ## 1. Problem
@@ -49,7 +49,7 @@ We need a system that:
 - Can **generalize across speakers**, not just memorize specific voices.
 - Eventually supports **confidence scores** so low-confidence trials can be flagged for human review.
 
-Self-supervised and weakly-supervised transformer models (Whisper, Wav2Vec 2.0, WavLM) are built exactly for this kind of setting: they learn rich speech representations from huge unlabeled or weakly labeled corpora, then can be adapted with relatively small labeled datasets.
+Self-supervised and weakly-supervised transformer models (Wav2Vec 2.0, WavLM) are built exactly for this kind of setting: they learn rich speech representations from huge unlabeled or weakly labeled corpora, then can be adapted with relatively small labeled datasets.
 
 ---
 
