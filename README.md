@@ -49,7 +49,7 @@ We need a system that:
 - Can **generalize across speakers**, not just memorize specific voices.
 - Eventually supports **confidence scores** so low-confidence trials can be flagged for human review.
 
-Self-supervised and weakly-supervised transformer models (Wav2Vec 2.0, WavLM) are built exactly for this kind of setting: they learn rich speech representations from huge unlabeled or weakly labeled corpora, then can be adapted with relatively small labeled datasets.
+Self-supervised and weakly-supervised transformer models (Wav2Vec 2.0, WavLM) are built exactly for this kind of setting. They learn rich speech representations from huge unlabeled or weakly labeled corpora, and then they can be adapted with relatively small labeled datasets.
 
 ---
 
@@ -80,13 +80,13 @@ In our pipeline, Wav2Vec 2.0 is used **off-the-shelf** (no additional fine-tunin
 
 - Built on the Wav2Vec 2.0 / HuBERT family but optimized as a **general-purpose speech representation** model for a wide range of tasks (SUPERB benchmark).  
 - Adds structured denoising and additional pretraining data (MIX-94k) to better capture speaker, background and other acoustic information.  
-- Achieves **SOTA or near-SOTA results** across tasks like speech separation, speaker verification, diarization, and ASR.  
+- Achieves **State of the Art (SOTA) or near-SOTA results** across tasks like speech separation, speaker verification, diarization, and ASR.  
 
-We again use WavLM both **off-the-shelf** as a **frozen encoder** plus a small classifier head, and compare performance to Wav2Vec 2.0 on the same splits.
+We again use WavLM both **off-the-shelf** and as a **frozen encoder** plus a small classifier head, and compare performance to Wav2Vec 2.0 on the same splits.
 
 ## 3. Experimental design
 
-### 3.1 Phase 1 – Out-the-shelf models + regex / fuzzy matching
+### 3.1 Phase 1 – Out-the-shelf models + regex matching
 
 Main idea: **“What if we just use off-the-shelf ASR and some string matching?”**
 
@@ -111,7 +111,7 @@ What we see:
 - Works *okay* for clean, clear productions.
 - **Homophones** are a major problem (e.g., orthographic ambiguity).
 - It always outputs *some* word, even when the participant response is incomplete or non-target (“an” vs “Anne”, “put” vs “putt”).
-- We’d still need humans to manually inspect borderline / noisy cases, so it doesn’t actually save that much time.
+- We’d still need humans to manually inspect borderline / noisy cases, so it wouldn't actually save any time.
 
 Conclusion: this is a reasonable baseline, but **purely transcript-based scoring is not enough** for this task.
 
@@ -134,7 +134,7 @@ Pipeline:
 
 ![Wav2Vec 2.0 MLP Learning Curves](figures/wav2vec2_mlp_learning_curves.png)
 
-*Figure 6. Wav2Vec 2.0 MLP Learning Curves also show overfitting but promising for next iteration.*
+*Figure 6. Wav2Vec 2.0 MLP Learning Curves also show overfitting but promising relatively canonical learning curves for next iteration.*
 
 Empirical takeaway (pilot):
 
@@ -142,7 +142,7 @@ Empirical takeaway (pilot):
   - **Wav2Vec 2.0 features separated “correct” vs “incorrect”** responses more cleanly; the classifier generalized better to new participants.
   - **WavLM features tended to overfit speakers** more in this setup, with weaker generalization at this small data scale.
 - In other words, **for this specific task and dataset size, “frozen Wav2Vec 2.0 + small head” beat “frozen WavLM + same head”**, despite WavLM’s stronger performance on broad benchmarks.
-- Bonus: the homophone problem from earlier disappears!
+- Bonus: the homophone/orthographic ambiguity problem from earlier disappears!
 
 Given the current tiny dataset and simple head, **Wav2Vec 2.0 was an easier representation space for the classifier** to carve out a good decision boundary.
 
@@ -163,7 +163,7 @@ Since this will be my MSDS Capstone project, I have a few plans to use what I've
 Near-term:
 
 - **Scale up Phase 2**:
-  - Add more participants and more trials per participant.
+  - Add more participants data (add ~36 more participants for a total of ~50 participants x 22 audio files).
   - Re-run Wav2Vec 2.0 vs WavLM under the same conditions with better regularization and more robust splitting.
 - Add an **explicit confidence score** from the classifier head (or from calibrated probabilities).
   - Use this to set a **threshold for human review**.
@@ -177,7 +177,7 @@ Longer-term:
   - Visualizations of confidence and error patterns across participants.
   - Hooks for exporting data directly into analysis pipelines (R, Python, etc.).
 - Explore **multi-class labels** (e.g., partial credit, specific error types) rather than just binary correct/incorrect.
-- Investigate **transfer to other speech tasks** in the lab (e.g., other production tasks, repetition, or lexical decision with spoken responses).
+- Investigate **transfer to other speech tasks** in the lab (e.g., North American Adult Reading Test, blending nonwords, pseudoword repetition).
 
 ---
 
