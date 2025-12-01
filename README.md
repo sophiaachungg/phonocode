@@ -86,7 +86,7 @@ We again use WavLM both **off-the-shelf** and as a **frozen encoder** plus a sma
 
 ## 3. Experimental design
 
-### 3.1 Phase 1 – Out-the-shelf models + regex matching
+### 3.1 Phase 1 – Off-the-shelf models + regex matching
 
 Main idea: **“What if we just use off-the-shelf ASR and some string matching?”**
 
@@ -104,11 +104,11 @@ Steps:
 
 ![Per Item Accuracy](figures/off_the_shelf_per_item_accuracy.png)
 
-*Figure 4. Off-the-shelf model accuracy per task item. Correct answers are anonymized. Diagonal line indicates equal performance between models.*
+*Figure 4. Off-the-shelf model accuracy per task item. Each point indicates a task item. Correct answers are anonymized. Diagonal line indicates equal performance between models.*
 
 What we see:
 
-- Works *okay* for clean, clear productions.
+- Works okay for clean, clear productions.
 - **Homophones** are a major problem (e.g., orthographic ambiguity).
 - It always outputs *some* word, even when the participant response is incomplete or non-target (“an” vs “Anne”, “put” vs “putt”).
 - We’d still need humans to manually inspect borderline / noisy cases, so it wouldn't actually save any time.
