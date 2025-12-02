@@ -20,7 +20,7 @@ For this pilot:
 - Question 2: Which ASR tool (Wav2Vec 2.0 or WavLM) works best fine-tuned for this task?
 - **14 participants × 22 audio files each** (`.wav`)
 - Each file *should* be a single spoken response (the reversed nonword).
-- We have manually coded ground truth for each response (correct vs incorrect).
+- I have manually coded ground truth for each response (correct vs incorrect).
 
 ### 1.2 Why this matters
 
@@ -44,10 +44,10 @@ The audio is messy:
 - Variable mic quality; some trials cut off early or have room noise.
 - Participants may hesitate, mispronounce, or add extra material before/after the target word.
 
-We need a system that:
+Need a system that:
 
 - Is **robust to noise and channel variation**.
-- Can work **with limited labeled data** (we have ground truth but not a huge corpus).
+- Can work **with limited labeled data**.
 - Can **generalize across speakers**, not just memorize specific voices.
 - Eventually supports **confidence scores** so low-confidence trials can be flagged for human review.
 
@@ -72,9 +72,8 @@ This project compares two strong ASR backbones:
 - Uses a CNN feature encoder → masks portions of latent features → Transformer context network → contrastive loss over **quantized speech units**.  
 - Breaking down the quantization module: during pre-training, the output of the CNN is fed into the Transformer (branch 1) and to a "Product Quantization" block (branch 2). This module is for generating its own target labels and predicting them within the model.
 - Extremely **label-efficient**: with only 10 minutes of labeled Librispeech data, it reaches WER 4.8 / 8.2 (test-clean / test-other), and with full data it achieves state-of-the-art WER while using far less labeled data than previous approaches.
-- Uses Convolutional Positional Embedding: runs a convolution over the input features and adds this result to the inputs before they enter the Transformer. Position is encoded implicitly and statically. 
 
-In my pipeline, Wav2Vec 2.0 is used **off-the-shelf** (no additional fine-tuning) as a baseline and as a **frozen encoder**: we extract embeddings for each audio file and train a small classifier head to predict correct (1) vs incorrect (0).
+In my pipeline, Wav2Vec 2.0 is used **off-the-shelf** (no additional fine-tuning) as a baseline and as a **frozen encoder**: extract embeddings for each audio file and train a small classifier head to predict correct (1) vs incorrect (0).
 
 ### 2.2 WavLM
 
@@ -84,7 +83,6 @@ In my pipeline, Wav2Vec 2.0 is used **off-the-shelf** (no additional fine-tuning
 
 - Nearly identical to Wav2Vec 2.0 architecture but *without* the quantization module (replaced with a simple classification head for prediction).
 - Built on the Wav2Vec 2.0 / HuBERT family but optimized as a **general-purpose speech representation** model for a wide range of tasks (SUPERB benchmark).
-- Uses Gated Relative Position Bias: modifies the attention mechanism inside the Transformer layers. It adds a learnable bias to the attention scores based on the relative distance between tokens.
 - Adds structured denoising and additional pretraining data (MIX-94k) to better capture speaker, background and other acoustic information.  
 - Achieves **State of the Art (SOTA) or near-SOTA results** across tasks like speech separation, speaker verification, diarization, and ASR.
 
@@ -92,7 +90,7 @@ I again use WavLM both **off-the-shelf** and as a **frozen encoder** plus a smal
 
 ## 3. Experimental design
 
-### 3.1 Phase 1 – Off-the-shelf models + regex matching
+### 3.1 Phase 1 – Off-the-shelf models
 
 Main idea: **“What if we just use off-the-shelf ASR and some string matching?”**
 
@@ -159,40 +157,25 @@ Given the current tiny dataset and simple head, **Wav2Vec 2.0 was an easier repr
 
 Both Wav2Vec2 and WavLM models inherit biases from their pre-training data:
 
-**1. Speaker Demographics**
 - **Training data**: Primarily English audiobooks (LibriSpeech, LibriLight)
 - **Bias**: Better performance on:
   - Standard American English accents
   - Adult speakers (especially those who narrate audiobooks)
   - Clear, studio-quality audio
-- **Implication**: May underperform on:
-  - Non-native English speakers
-  - Regional accents/dialects (Southern, AAVE, etc.)
-  - Children's voices
-  - Older adults with age-related voice changes
-
-**2. Recording Conditions**
 - **Training data**: Clean, professional audiobook recordings
 - **Bias**: Models expect:
   - Low background noise
   - Consistent microphone quality
   - Quiet recording environments
-- **Implication**: Performance degrades with:
-  - Lab room noise (HVAC, equipment)
-  - Variable microphone placement
-  - Background conversations (RA instructions)
-
-**3. Linguistic Content**
 - **Training data**: Read speech from published books
 - **Bias**: Optimized for:
   - Standard grammatical English
   - Natural prosody and intonation
   - Complete words and sentences
-- **Implication**: Struggles with:
-  - Nonwords (phoneme reversals)
-  - Hesitations and disfluencies
-  - Atypical prosody (speech disorders)
-  - Partial utterances
+ 
+### Limitations
+- Limited training data for this phase (14 participants x 22 audio files) (scaling laws)
+- Limited computational power
 
 ---
 
@@ -205,6 +188,7 @@ Near-term:
 - **Scale up Phase 2**:
   - Add more participants data (add ~36 more participants for a total of ~50 participants x 22 audio files).
   - Re-run Wav2Vec 2.0 vs WavLM under the same conditions with better regularization and more robust splitting.
+  - Run fine-tuning in ACCRE for maximum computational power
 - Add an **explicit confidence score** from the classifier head (or from calibrated probabilities).
   - Use this to set a **threshold for human review**.
   - High-confidence predictions → auto-accepted.
