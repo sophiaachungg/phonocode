@@ -102,6 +102,8 @@ Steps:
    - A set of acceptable variants / spellings.
 3. Evaluate against the manually coded ground truth (0/1).
 
+![Model Accuracy Per Participant](figures/off_the_shelf_model_acc.png)
+
 *Figure 3. Off-the-shelf model accuracy per participant is unremarkable.*
 
 ![Per Item Accuracy](figures/off_the_shelf_per_item_accuracy.png)
