@@ -1,6 +1,6 @@
 # PhonoCode: Transformer-Based Scoring of Phonological Tasks
 
-This repo contains code for experimenting with transformer-based speech models (e.g., Wav2Vec2, WavLM) to *automatically score* phonological task responses.  
+This repo contains code for experimenting with transformer-based speech models (Wav2Vec 2.0 and WavLM) to *automatically score* phonological task responses.  
 Each audio clip is classified as **correct (1)** or **incorrect (0)**.
 
 ## 1. Problem
@@ -16,6 +16,8 @@ The Communication and Language Lab (CaLL) studies **individual differences in la
 
 For this pilot:
 
+- Question 1: To what extent are state-of-the-art ASR tools effective "off-the-shelf" for this task?
+- Question 2: Which ASR tool (Wav2Vec 2.0 or WavLM) works best fine-tuned for this task?
 - **14 participants × 22 audio files each** (`.wav`)
 - Each file *should* be a single spoken response (the reversed nonword).
 - We have manually coded ground truth for each response (correct vs incorrect).
@@ -68,9 +70,11 @@ This project compares two strong ASR backbones:
 
 - **Self-supervised** transformer encoder trained directly on raw waveforms.
 - Uses a CNN feature encoder → masks portions of latent features → Transformer context network → contrastive loss over **quantized speech units**.  
+- Breaking down the quantization module: during pre-training, the output of the CNN is fed into the Transformer (branch 1) and to a "Product Quantization" block (branch 2). This module is for generating its own target labels and predicting them within the model.
 - Extremely **label-efficient**: with only 10 minutes of labeled Librispeech data, it reaches WER 4.8 / 8.2 (test-clean / test-other), and with full data it achieves state-of-the-art WER while using far less labeled data than previous approaches.
+- Uses Convolutional Positional Embedding: runs a convolution over the input features and adds this result to the inputs before they enter the Transformer. Position is encoded implicitly and statically. 
 
-In our pipeline, Wav2Vec 2.0 is used **off-the-shelf** (no additional fine-tuning) as a baseline and as a **frozen encoder**: we extract embeddings for each audio file and train a small classifier head to predict correct (1) vs incorrect (0).
+In my pipeline, Wav2Vec 2.0 is used **off-the-shelf** (no additional fine-tuning) as a baseline and as a **frozen encoder**: we extract embeddings for each audio file and train a small classifier head to predict correct (1) vs incorrect (0).
 
 ### 2.2 WavLM
 
@@ -78,11 +82,13 @@ In our pipeline, Wav2Vec 2.0 is used **off-the-shelf** (no additional fine-tunin
 
 *Figure 2. WavLM Model Architecture from Chen et al., 2022*
 
-- Built on the Wav2Vec 2.0 / HuBERT family but optimized as a **general-purpose speech representation** model for a wide range of tasks (SUPERB benchmark).  
+- Nearly identical to Wav2Vec 2.0 architecture but *without* the quantization module (replaced with a simple classification head for prediction).
+- Built on the Wav2Vec 2.0 / HuBERT family but optimized as a **general-purpose speech representation** model for a wide range of tasks (SUPERB benchmark).
+- Uses Gated Relative Position Bias: modifies the attention mechanism inside the Transformer layers. It adds a learnable bias to the attention scores based on the relative distance between tokens.
 - Adds structured denoising and additional pretraining data (MIX-94k) to better capture speaker, background and other acoustic information.  
-- Achieves **State of the Art (SOTA) or near-SOTA results** across tasks like speech separation, speaker verification, diarization, and ASR.  
+- Achieves **State of the Art (SOTA) or near-SOTA results** across tasks like speech separation, speaker verification, diarization, and ASR.
 
-We again use WavLM both **off-the-shelf** and as a **frozen encoder** plus a small classifier head, and compare performance to Wav2Vec 2.0 on the same splits.
+I again use WavLM both **off-the-shelf** and as a **frozen encoder** plus a small classifier head, and compare performance to Wav2Vec 2.0 on the same splits.
 
 ## 3. Experimental design
 
@@ -146,17 +152,51 @@ Empirical takeaway (pilot):
 
 Given the current tiny dataset and simple head, **Wav2Vec 2.0 was an easier representation space for the classifier** to carve out a good decision boundary.
 
-### 3.3 Metrics
+---
+## 4. Model Biases and Limitations
 
-Right now the emphasis is on:
+### Pre-training Data Biases
 
-- **Accuracy** and **confusion matrices** for correct vs incorrect.
-- **Participant-wise splits** (no speaker leakage) to avoid over-optimistic results.
-- Later we’ll add **ROC curves, AUC, precision/recall**, and calibration analysis once the models are more stable.
+Both Wav2Vec2 and WavLM models inherit biases from their pre-training data:
+
+**1. Speaker Demographics**
+- **Training data**: Primarily English audiobooks (LibriSpeech, LibriLight)
+- **Bias**: Better performance on:
+  - Standard American English accents
+  - Adult speakers (especially those who narrate audiobooks)
+  - Clear, studio-quality audio
+- **Implication**: May underperform on:
+  - Non-native English speakers
+  - Regional accents/dialects (Southern, AAVE, etc.)
+  - Children's voices
+  - Older adults with age-related voice changes
+
+**2. Recording Conditions**
+- **Training data**: Clean, professional audiobook recordings
+- **Bias**: Models expect:
+  - Low background noise
+  - Consistent microphone quality
+  - Quiet recording environments
+- **Implication**: Performance degrades with:
+  - Lab room noise (HVAC, equipment)
+  - Variable microphone placement
+  - Background conversations (RA instructions)
+
+**3. Linguistic Content**
+- **Training data**: Read speech from published books
+- **Bias**: Optimized for:
+  - Standard grammatical English
+  - Natural prosody and intonation
+  - Complete words and sentences
+- **Implication**: Struggles with:
+  - Nonwords (phoneme reversals)
+  - Hesitations and disfluencies
+  - Atypical prosody (speech disorders)
+  - Partial utterances
 
 ---
 
-## 4. Next steps
+## 5. Next Steps
 
 Since this will be my MSDS Capstone project, I have a few plans to use what I've learned to scale up.
 
@@ -181,7 +221,130 @@ Longer-term:
 
 ---
 
-## 5. References
+## 6. Intended Use & Licensing
 
-- **Wav2Vec 2.0** – Baevski et al., *Wav2Vec 2.0: A Framework for Self-Supervised Learning of Speech Representations*, NeurIPS 2020.  
-- **WavLM** – Chen et al., *WavLM: Large-Scale Self-Supervised Pre-Training for Full Stack Speech Processing*, IEEE/ACM TASLP 2022.  
+### Intended Use
+✅ Research use in psycholinguistics labs
+✅ Phoneme reversal task scoring
+✅ Assisting RAs with manual coding validation
+✅ Flagging uncertain samples for human review
+
+### Not Intended For
+❌ Clinical diagnosis or assessment
+❌ High-stakes decision making without human oversight
+❌ Populations outside of neurotypical adult English speakers (without additional validation)
+❌ Real-time assessment without confidence thresholding
+
+### Licenses
+- Code: MIT License
+- Models: Apache 2.0 (following HuggingFace base models)
+- Data: Restricted (human subjects research)
+
+---
+
+### Try It Out for Yourself!
+Setup Instructions & Usage Guide
+#### 1. Prerequisites
+
+- Python 3.8+
+- CUDA-capable GPU recommended (for faster training/inference)
+- Google Colab account (if using provided notebooks)
+- ~10GB disk space for models and data
+
+#### 2. Local Setup
+
+1. **Clone the repository**
+```bash
+git clone https://github.com/yourusername/phonocode.git
+cd phonocode
+```
+
+2. **Create virtual environment**
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
+
+3. **Install dependencies**
+```bash
+pip install -r requirements.txt
+```
+
+Required packages:
+```
+transformers>=4.30.0
+datasets>=2.14.0
+torch>=2.0.0
+librosa>=0.10.0
+soundfile>=0.12.0
+pandas>=2.0.0
+numpy>=1.24.0
+scikit-learn>=1.3.0
+evaluate>=0.4.0
+jiwer>=3.0.0
+accelerate>=0.20.0
+tensorboard>=2.13.0
+```
+
+#### 3. Project Structure
+
+```
+phonocode/
+├── data/
+│   ├── raw/                    # Original .wav files
+│   └── processed/
+│       └── phoneme_reversal/   # Organized by participant
+├── code/
+│   ├── run_wav2vec2_inference.py
+│   ├── run_wavlm_inference.py
+│   ├── train_wav2vec2_frozen_classifier.py
+│   └── train_wavlm_frozen_classifier.py
+├── results/                    # Output CSVs and evaluation metrics
+├── scoring/                    # Ground truth labels
+└── figures/                    # Visualizations for documentation
+```
+
+#### 4. Data
+
+Organize audio files following this naming convention:
+```
+{participant_id}_{item_number}_{target_word}.wav
+```
+
+Example:
+```
+ReXa_008_01_an.wav
+ReXa_008_02_put.wav
+```
+
+Create ground truth CSV with columns:
+```
+participant_id, word_1, word_2, ..., word_n
+```
+Where values are:
+- `0` = incorrect
+- `1` = correct 
+
+---
+
+## 6. References
+
+- **Wav2Vec 2.0** – Baevski et al., *Wav2Vec 2.0: A Framework for Self-Supervised Learning of Speech Representations*, NeurIPS 2020.
+```bibtex
+@inproceedings{baevski2020wav2vec,
+  title={wav2vec 2.0: A framework for self-supervised learning of speech representations},
+  author={Baevski, Alexei and Zhou, Yuhao and Mohamed, Abdelrahman and Auli, Michael},
+  booktitle={NeurIPS},
+  year={2020}
+}
+```
+
+- **WavLM** – Chen et al., *WavLM: Large-Scale Self-Supervised Pre-Training for Full Stack Speech Processing*, IEEE/ACM TASLP 2022.
+```bibtex
+@article{chen2022wavlm,
+  title={WavLM: Large-scale self-supervised pre-training for full stack speech processing},
+  author={Chen, Sanyuan and Wang, Chengyi and Chen, Zhengyang and Wu, Yu and others},
+  journal={IEEE/ACM Transactions on Audio, Speech, and Language Processing},
+  year={2022}
+}
+```
