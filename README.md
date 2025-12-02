@@ -102,8 +102,6 @@ Steps:
    - A set of acceptable variants / spellings.
 3. Evaluate against the manually coded ground truth (0/1).
 
-![Model Accuracy Per Participant](figures/off_the_shelf_model_acc.png)
-
 *Figure 3. Off-the-shelf model accuracy per participant is unremarkable.*
 
 ![Per Item Accuracy](figures/off_the_shelf_per_item_accuracy.png)
@@ -132,13 +130,62 @@ Pipeline:
 3. Train a small classifier head (e.g., logistic regression or a tiny MLP) on top of these embeddings to predict **0/1**.
 4. Use **participant-grouped splits** so speakers in the test set are unseen during training.
 
+---
+
+```mermaid
+flowchart TB
+    A[Audio File<br/>.wav @ 16kHz]
+    B[Feature Extraction<br/>Waveform to Features]
+    
+    C1[Wav2Vec2-base<br/>95M params<br/>Frozen Encoder]
+    C2[WavLM-base<br/>95M params<br/>Frozen Encoder]
+    
+    D[Direct Classification Path]
+    
+    E1[Pooling Layer<br/>mean or max pool]
+    E2[MLP Classifier<br/>768 → 256 → 2]
+    E3[Softmax Layer<br/>2 classes]
+    
+    G1[Binary Prediction<br/>0: Incorrect<br/>1: Correct]
+    G2[Confidence Score<br/>0.0 - 1.0]
+    
+    A --> B
+    B --> C1
+    B --> C2
+    
+    C1 --> D
+    C2 --> D
+    
+    D --> E1
+    E1 --> E2
+    E2 --> E3
+    
+    E3 --> G1
+    E3 --> G2
+    
+    style A fill:#d0e8f7,stroke:#333,stroke-width:2px,color:#000
+    style B fill:#f0f0f0,stroke:#333,stroke-width:2px,color:#000
+    style C1 fill:#ffe6cc,stroke:#333,stroke-width:2px,color:#000
+    style C2 fill:#ffe6cc,stroke:#333,stroke-width:2px,color:#000
+    style D fill:#f0f0f0,stroke:#333,stroke-width:2px,color:#000
+    style E1 fill:#e6e6ff,stroke:#333,stroke-width:2px,color:#000
+    style E2 fill:#e6e6ff,stroke:#333,stroke-width:2px,color:#000
+    style E3 fill:#e6e6ff,stroke:#333,stroke-width:2px,color:#000
+    style G1 fill:#d4edda,stroke:#333,stroke-width:3px,color:#000
+    style G2 fill:#fff3cd,stroke:#333,stroke-width:3px,color:#000
+```
+
+--- 
+
+*Figure 5. Fine-Tuned Model Architecture.*
+
 ![WavLM MLP Learning Curves](figures/wavlm_mlp_learning_curves.png)
 
-*Figure 5. WavLM MLP Learning Curves show overfitting.*
+*Figure 6. WavLM MLP Learning Curves show overfitting.*
 
 ![Wav2Vec 2.0 MLP Learning Curves](figures/wav2vec2_mlp_learning_curves.png)
 
-*Figure 6. Wav2Vec 2.0 MLP Learning Curves also show overfitting but promising relatively canonical learning curves for next iteration.*
+*Figure 7. Wav2Vec 2.0 MLP Learning Curves also show overfitting but promising relatively canonical learning curves for next iteration.*
 
 Empirical takeaway (pilot):
 
