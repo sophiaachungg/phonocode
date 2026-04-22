@@ -1,0 +1,11 @@
+protobuf
+transformers
+librosa
+soundfile
+pandas
+torch==2.5.1
+torchvision==0.20.1
+torchaudio==2.5.1
+scikit-learn
+numpy
+matplotlib
