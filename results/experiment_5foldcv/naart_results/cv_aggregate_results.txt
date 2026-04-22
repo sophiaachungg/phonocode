@@ -1,0 +1,39 @@
+NAART  cv1: 5-Fold Participant-Grouped Cross-Validation
+LR=1.0e-04  WD=2.0e-04
+Checkpoint criterion: val balanced accuracy
+Threshold: tuned per-fold on val set from [0.3, 0.35, 0.4, 0.45, 0.5]
+SKIP_WORDS: {'gouge', 'placebo'}
+Duration threshold: 3000 ms
+
+Per-fold results:
+ fold  test_acc  test_bal_acc  macro_f1  cl0_recall  cl1_recall  threshold    tv_gap  best_epoch  stopped_epoch
+    1  0.844229      0.850367  0.829158    0.867008    0.833726        0.5  0.098479          32             42
+    2  0.842615      0.834150  0.831063    0.803571    0.864728        0.5  0.069750          53             63
+    3  0.841808      0.830678  0.832437    0.781250    0.880105        0.5  0.054572          45             55
+    4  0.866828      0.857314  0.853943    0.826698    0.887931        0.5 -0.009406          29             39
+    5  0.852542      0.838975  0.830681    0.803867    0.874083        0.5  0.027315          59             69
+
+Mean ± Std over 5 folds:
+  Accuracy:        0.850 ± 0.011
+  Balanced Acc:    0.842 ± 0.011
+  Macro F1:        0.835 ± 0.010
+  Class-0 Recall:  0.816 ± 0.032
+  Class-1 Recall:  0.868 ± 0.021
+  Mean TV-gap:     0.0481
+
+Aggregate confusion matrix (all folds stitched):
+[[1718  390]
+ [ 533 3495]]
+
+Aggregate classification report:
+              precision    recall  f1-score   support
+
+           0      0.763     0.815     0.788      2108
+           1      0.900     0.868     0.883      4028
+
+    accuracy                          0.850      6136
+   macro avg      0.831     0.841     0.836      6136
+weighted avg      0.853     0.850     0.851      6136
+
+
+LR CV baseline:  acc=0.839 ± 0.014  f1=0.826 ± 0.013

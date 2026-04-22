@@ -1,0 +1,37 @@
+cv1: 5-Fold Participant-Grouped Cross-Validation (nested validation)
+LR=1.0e-04  WD=2.0e-04
+Checkpoint criterion: val balanced accuracy
+Threshold: tuned per-fold on val set from [0.3, 0.35, 0.4, 0.45, 0.5]
+
+Per-fold results:
+ fold  test_acc  test_bal_acc  macro_f1  cl0_recall  cl1_recall  threshold   tv_gap  best_epoch  stopped_epoch
+    1  0.873711      0.858985  0.862674    0.803509    0.914460        0.5 0.050821          22             32
+    2  0.866579      0.863151  0.856781    0.851301    0.875000        0.5 0.043480          31             41
+    3  0.874667      0.870346  0.868999    0.850340    0.890351        0.5 0.139414          48             58
+    4  0.859740      0.851719  0.854053    0.806962    0.896476        0.5 0.030955          25             35
+    5  0.908730      0.903325  0.903049    0.881119    0.925532        0.5 0.055007          33             43
+
+Mean ± Std over 5 folds:
+  Accuracy:        0.877 ± 0.019
+  Balanced Acc:    0.870 ± 0.020
+  Macro F1:        0.869 ± 0.020
+  Class-0 Recall:  0.839 ± 0.033
+  Class-1 Recall:  0.900 ± 0.020
+  Mean TV-gap:     0.0639
+
+Aggregate confusion matrix (all folds stitched):
+[[1215  235]
+ [ 235 2124]]
+
+Aggregate classification report:
+              precision    recall  f1-score   support
+
+           0      0.838     0.838     0.838      1450
+           1      0.900     0.900     0.900      2359
+
+    accuracy                          0.877      3809
+   macro avg      0.869     0.869     0.869      3809
+weighted avg      0.877     0.877     0.877      3809
+
+
+LR CV baseline:  acc=0.868 ± 0.016  f1=0.862 ± 0.017

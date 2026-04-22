@@ -1,0 +1,34 @@
+Stage 2: WavLM Similarity Classifier
+Model: microsoft/wavlm-large  |  Unfrozen layers: 2
+
+ fold  test_acc  test_bal_acc  macro_f1  cl0_recall  cl1_recall  threshold    tv_gap  best_epoch  stopped_epoch
+    1  0.858679      0.849333  0.853269    0.789091    0.909574        0.5 -0.003103          15             25
+    2  0.827751      0.826580  0.821755    0.821138    0.832021        0.5  0.175252          27             37
+    3  0.841693      0.849926  0.836184    0.882353    0.817500        0.5  0.191385          33             43
+    4  0.880184      0.868331  0.871744    0.818548    0.918114        0.5  0.069131          19             29
+    5  0.802147      0.799315  0.799773    0.771331    0.827298        0.5  0.201071          34             44
+
+Mean ± Std over 5 folds:
+  Accuracy:       0.842 ± 0.030
+  Balanced Acc:   0.839 ± 0.027
+  Macro F1:       0.837 ± 0.028
+  Class-0 Recall: 0.816 ± 0.042
+  Class-1 Recall: 0.861 ± 0.049
+  Mean TV-gap:    0.1267
+
+Aggregate CM:
+[[1058  242]
+ [ 266 1653]]
+
+Aggregate report:
+              precision    recall  f1-score   support
+
+           0      0.799     0.814     0.806      1300
+           1      0.872     0.861     0.867      1919
+
+    accuracy                          0.842      3219
+   macro avg      0.836     0.838     0.837      3219
+weighted avg      0.843     0.842     0.842      3219
+
+
+LR baseline: acc=0.845±0.026  f1=0.839±0.024

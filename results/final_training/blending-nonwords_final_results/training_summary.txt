@@ -1,0 +1,39 @@
+PHONOCODE BN — Final LR Production Model
+============================================================
+
+Encoder:          microsoft/wavlm-large (frozen, eval mode)
+Feature:          [A, B, A-B, A*B] + difficulty scalar
+Feature dim:      8193
+Classifier:       LogisticRegression(class_weight='balanced')
+Training trials:  3219
+Participants:     140
+Class 0:          1300 (40.4%)
+Class 1:          1919 (59.6%)
+Skipped trials:   713
+
+CV performance estimate (from Stage 2 — use these numbers):
+  Accuracy:        0.845 ± 0.026
+  Balanced Acc:    0.839 ± 0.027  (primary metric)
+  Macro F1:        0.837 ± 0.028
+  Class-0 Recall:  0.816 ± 0.042
+  Class-1 Recall:  0.861 ± 0.049
+
+Training-set metrics (optimistic — for sanity check only):
+  Accuracy:        0.961
+  Balanced Acc:    0.962
+  Macro F1:        0.960
+
+Confusion matrix (training set):
+[[1258   42]
+ [  84 1835]]
+
+Classification report (training set):
+              precision    recall  f1-score   support
+
+           0      0.937     0.968     0.952      1300
+           1      0.978     0.956     0.967      1919
+
+    accuracy                          0.961      3219
+   macro avg      0.958     0.962     0.960      3219
+weighted avg      0.961     0.961     0.961      3219
+

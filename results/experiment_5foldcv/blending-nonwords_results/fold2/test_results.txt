@@ -1,0 +1,24 @@
+Fold: 2
+Best epoch: 27
+Stopped at: 37
+TV-gap: 0.1753
+Threshold: 0.50
+Test Acc: 0.828
+Test Bal Acc: 0.827
+Macro F1: 0.822
+Cl0 Recall: 0.821
+Cl1 Recall: 0.832
+
+CM:
+[[202  44]
+ [ 64 317]]
+
+              precision    recall  f1-score   support
+
+           0      0.759     0.821     0.789       246
+           1      0.878     0.832     0.854       381
+
+    accuracy                          0.828       627
+   macro avg      0.819     0.827     0.822       627
+weighted avg      0.832     0.828     0.829       627
+

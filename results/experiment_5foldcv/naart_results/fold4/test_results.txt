@@ -1,0 +1,32 @@
+Fold:             4
+Outer train participants:[np.str_('ReXa_010'), np.str_('ReXa_020'), np.str_('ReXa_027'), np.str_('ReXa_034'), np.str_('ReXa_040'), np.str_('ReXa_041'), np.str_('ReXa_043'), np.str_('ReXa_044'), np.str_('ReXa_045'), np.str_('ReXa_047'), np.str_('ReXa_048'), np.str_('ReXa_049'), np.str_('ReXa_050'), np.str_('ReXa_051'), np.str_('ReXa_056'), np.str_('ReXa_059'), np.str_('ReXa_060'), np.str_('ReXa_061'), np.str_('ReXa_062'), np.str_('ReXa_063'), np.str_('ReXa_064'), np.str_('ReXa_065'), np.str_('ReXa_066'), np.str_('ReXa_067'), np.str_('ReXa_068'), np.str_('ReXa_069'), np.str_('ReXa_072'), np.str_('ReXa_075'), np.str_('ReXa_076'), np.str_('ReXa_080'), np.str_('ReXa_087'), np.str_('ReXa_095'), np.str_('ReXa_100'), np.str_('ReXa_109'), np.str_('ReXa_110'), np.str_('ReXa_114'), np.str_('ReXa_116'), np.str_('ReXa_118'), np.str_('ReXa_125'), np.str_('ReXa_127'), np.str_('ReXa_128'), np.str_('ReXa_131'), np.str_('ReXa_138'), np.str_('ReXa_140'), np.str_('ReXa_142'), np.str_('ReXa_145'), np.str_('ReXa_147'), np.str_('ReXa_153'), np.str_('ReXa_155'), np.str_('ReXa_160'), np.str_('ReXa_163'), np.str_('ReXa_164'), np.str_('ReXa_165'), np.str_('ReXa_171'), np.str_('ReXa_176'), np.str_('ReXa_177'), np.str_('ReXa_179'), np.str_('ReXa_183'), np.str_('ReXa_190'), np.str_('ReXa_203'), np.str_('ReXa_204'), np.str_('ReXa_205'), np.str_('ReXa_207'), np.str_('ReXa_208'), np.str_('ReXa_209'), np.str_('ReXa_211'), np.str_('ReXa_214'), np.str_('ReXa_215'), np.str_('ReXa_218'), np.str_('ReXa_219'), np.str_('ReXa_221'), np.str_('ReXa_222'), np.str_('ReXa_227'), np.str_('ReXa_235'), np.str_('ReXa_237'), np.str_('ReXa_238'), np.str_('ReXa_240'), np.str_('ReXa_244'), np.str_('ReXa_261'), np.str_('ReXa_264'), np.str_('ReXa_312'), np.str_('ReXa_322'), np.str_('ReXa_343')]
+Inner train participants:[np.str_('ReXa_010'), np.str_('ReXa_020'), np.str_('ReXa_027'), np.str_('ReXa_034'), np.str_('ReXa_040'), np.str_('ReXa_041'), np.str_('ReXa_043'), np.str_('ReXa_044'), np.str_('ReXa_045'), np.str_('ReXa_048'), np.str_('ReXa_049'), np.str_('ReXa_050'), np.str_('ReXa_056'), np.str_('ReXa_059'), np.str_('ReXa_060'), np.str_('ReXa_061'), np.str_('ReXa_063'), np.str_('ReXa_065'), np.str_('ReXa_066'), np.str_('ReXa_067'), np.str_('ReXa_068'), np.str_('ReXa_069'), np.str_('ReXa_072'), np.str_('ReXa_076'), np.str_('ReXa_080'), np.str_('ReXa_087'), np.str_('ReXa_095'), np.str_('ReXa_100'), np.str_('ReXa_109'), np.str_('ReXa_110'), np.str_('ReXa_118'), np.str_('ReXa_127'), np.str_('ReXa_128'), np.str_('ReXa_131'), np.str_('ReXa_138'), np.str_('ReXa_140'), np.str_('ReXa_142'), np.str_('ReXa_145'), np.str_('ReXa_147'), np.str_('ReXa_153'), np.str_('ReXa_160'), np.str_('ReXa_163'), np.str_('ReXa_164'), np.str_('ReXa_171'), np.str_('ReXa_176'), np.str_('ReXa_177'), np.str_('ReXa_179'), np.str_('ReXa_183'), np.str_('ReXa_190'), np.str_('ReXa_203'), np.str_('ReXa_204'), np.str_('ReXa_205'), np.str_('ReXa_207'), np.str_('ReXa_211'), np.str_('ReXa_215'), np.str_('ReXa_218'), np.str_('ReXa_219'), np.str_('ReXa_221'), np.str_('ReXa_227'), np.str_('ReXa_235'), np.str_('ReXa_240'), np.str_('ReXa_244'), np.str_('ReXa_261'), np.str_('ReXa_312'), np.str_('ReXa_322'), np.str_('ReXa_343')]
+Validation participants:[np.str_('ReXa_047'), np.str_('ReXa_051'), np.str_('ReXa_062'), np.str_('ReXa_064'), np.str_('ReXa_075'), np.str_('ReXa_114'), np.str_('ReXa_116'), np.str_('ReXa_125'), np.str_('ReXa_155'), np.str_('ReXa_165'), np.str_('ReXa_208'), np.str_('ReXa_209'), np.str_('ReXa_214'), np.str_('ReXa_222'), np.str_('ReXa_237'), np.str_('ReXa_238'), np.str_('ReXa_264')]
+Test participants:[np.str_('ReXa_046'), np.str_('ReXa_052'), np.str_('ReXa_055'), np.str_('ReXa_073'), np.str_('ReXa_074'), np.str_('ReXa_077'), np.str_('ReXa_120'), np.str_('ReXa_129'), np.str_('ReXa_130'), np.str_('ReXa_144'), np.str_('ReXa_154'), np.str_('ReXa_157'), np.str_('ReXa_162'), np.str_('ReXa_172'), np.str_('ReXa_187'), np.str_('ReXa_196'), np.str_('ReXa_201'), np.str_('ReXa_217'), np.str_('ReXa_233'), np.str_('ReXa_304'), np.str_('ReXa_328')]
+Best epoch:       29
+Stopped at epoch: 39
+Best val bal_acc: 0.8526  (acc=0.861)
+Best val loss:    0.3456
+Train loss @ best:0.3550
+Train/val gap:    -0.0094
+Tuned threshold:  0.50  (val_bal_acc=0.853)
+Test Accuracy:    0.867
+Test Bal Acc:     0.857
+Macro F1:         0.854
+Class-0 Recall:   0.827
+Class-1 Recall:   0.888
+
+Confusion Matrix:
+[[353  74]
+ [ 91 721]]
+
+Classification Report:
+              precision    recall  f1-score   support
+
+           0      0.795     0.827     0.811       427
+           1      0.907     0.888     0.897       812
+
+    accuracy                          0.867      1239
+   macro avg      0.851     0.857     0.854      1239
+weighted avg      0.868     0.867     0.867      1239
+
