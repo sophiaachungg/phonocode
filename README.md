@@ -229,18 +229,18 @@ All tasks are evaluated using 5-fold participant-grouped cross-validation. All s
 
 | Fold | Accuracy | Balanced Acc | Macro F1 | Cl0 Recall | Cl1 Recall | Threshold |
 |:----:|:--------:|:------------:|:--------:|:----------:|:----------:|:---------:|
-| 1 | — | — | — | — | — | — |
-| 2 | — | — | — | — | — | — |
-| 3 | — | — | — | — | — | — |
-| 4 | — | — | — | — | — | — |
-| 5 | — | — | — | — | — | — |
-| **Mean** | **—** | **—** | **—** | **—** | **—** | — |
-| **Std** | **—** | **—** | **—** | **—** | **—** | — |
+| 1 | 0.873 | 0.859 | 0.863 | 0.804 | 0.914 | 0.5 |
+| 2 | 0.867 | 0.863 | 0.857 | 0.851 | 0.875 | 0.5 |
+| 3 | 0.875 | 0.870 | 0.869 | 0.850 | 0.890 | 0.5 |
+| 4 | 0.860 | 0.852 | 0.854 | 0.807 | 0.896 | 0.5 |
+| 5 | 0.909 | 0.903 | 0.903 | 0.881 | 0.926 | 0.5 |
+| **Mean** | **0.877** | **0.870** | **0.869** | **0.839** | **0.900** | — |
+| **Std** | **0.019** | **0.020** | **0.020** | **0.033** | **0.020** | — |
 
 > **Class 0** = incorrect response. **Class 1** = correct response.
 > Balanced accuracy is the primary metric; class-0 recall is the primary clinical signal.
 
-**Logistic regression baseline:** Acc = — ± —, Macro F1 = — ± —
+**Logistic regression baseline:** Acc = 0.868 ± 0.016, Macro F1 = 0.862 ± 0.017
 
 #### Previous Run (36 Participants, hardcoded class weights, val_loss checkpoint selection)
 
