@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PhonoCode — RA Scoring</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ── Design tokens: dark (default) ─────────────────────────────────────── */
+  :root {
+    --bg:          #0e0f11;
+    --surface:     #161719;
+    --surface-2:   #1e2023;
+    --border:      #2a2d32;
+    --border-soft: #222427;
+    --text:        #e8eaed;
+    --text-muted:  #7a7f8a;
+    --text-dim:    #4a4f5a;
+    --warn:        #f4a44a;
+    --warn-dim:    #4a3010;
+    --danger:      #f45a5a;
+    --danger-dim:  #3a1010;
+    --mono:        'IBM Plex Mono', monospace;
+    --sans:        'IBM Plex Sans', sans-serif;
+    --radius:      6px;
+    --transition:  0.15s ease;
+
+    /* task accent — green default, overridden per task */
+    --accent:      #4af4b0;
+    --accent-dim:  #1a5c41;
+    --accent-text: #0a1a12;
+  }
+
+  /* ── Light mode ─────────────────────────────────────────────────────────── */
+  [data-theme="light"] {
+    --bg:          #f5f6f8;
+    --surface:     #ffffff;
+    --surface-2:   #eef0f3;
+    --border:      #d8dce4;
+    --border-soft: #e4e7ec;
+    --text:        #111316;
+    --text-muted:  #5a6070;
+    --text-dim:    #9aa0ad;
+    --warn-dim:    #fef3e2;
+    --danger-dim:  #fde8e8;
+  }
+
+  /* ── Task accent palettes ───────────────────────────────────────────────── */
+  [data-task="phoneme_reversal"] {
+    --accent:      #4af4b0;
+    --accent-dim:  #1a5c41;
+    --accent-text: #0a1a12;
+  }
+  [data-task="phoneme_reversal"][data-theme="light"] {
+    --accent-dim:  #d0f7eb;
+    --accent-text: #0a1a12;
+  }
+
+  [data-task="blending_nonwords"] {
+    --accent:      #f472b6;
+    --accent-dim:  #5c1a3a;
+    --accent-text: #1a0010;
+  }
+  [data-task="blending_nonwords"][data-theme="light"] {
+    --accent-dim:  #fce7f3;
+    --accent-text: #1a0010;
+  }
+
+  [data-task="naart"] {
+    --accent:      #60a5fa;
+    --accent-dim:  #1a3a5c;
+    --accent-text: #00101a;
+  }
+  [data-task="naart"][data-theme="light"] {
+    --accent-dim:  #dbeafe;
+    --accent-text: #00101a;
+  }
+
+  /* ── Reset ──────────────────────────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 14px; }
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.5;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  button { font-family: var(--sans); cursor: pointer; border: none; outline: none; }
+  input, select { font-family: var(--sans); outline: none; }
+  a { color: var(--accent); text-decoration: none; }
+
+  /* ── Layout ─────────────────────────────────────────────────────────────── */
+  .app { display: flex; flex-direction: column; min-height: 100vh; }
+
+  header {
+    padding: 14px 28px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 100;
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+
+  .header-left { display: flex; align-items: center; gap: 16px; }
+
+  .logo {
+    font-family: var(--mono);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+    transition: color 0.2s ease;
+  }
+  .logo span { color: var(--text-muted); font-weight: 400; }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .session-badge {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    display: none;
+    align-items: center;
+    gap: 10px;
+  }
+  .session-badge.visible { display: flex; }
+  .session-badge .pill {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    padding: 3px 10px;
+    border-radius: 20px;
+    color: var(--text);
+    transition: all 0.2s ease;
+  }
+  .session-badge .pill.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-dim);
+  }
+
+  main { flex: 1; padding: 40px 32px; max-width: 1100px; margin: 0 auto; width: 100%; }
+
+  /* ── Views ────────────────────────────────────────────────────────────── */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ── Icon buttons (theme toggle, info) ─────────────────────────────────── */
+  .icon-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: var(--radius);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition);
+    flex-shrink: 0;
+  }
+  .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .icon-btn svg { width: 15px; height: 15px; }
+
+  /* ── Login ─────────────────────────────────────────────────────────────── */
+  .login-wrap {
+    max-width: 420px;
+    margin: 72px auto 0;
+  }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 24px;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    margin-bottom: 8px;
+  }
+  .subtitle {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 36px;
+  }
+
+  .form-group { margin-bottom: 20px; }
+  label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    letter-spacing: 0.02em;
+  }
+
+  input[type="text"], select {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    color: var(--text);
+    font-size: 0.95rem;
+    transition: border-color var(--transition), background 0.2s ease;
+  }
+  input[type="text"]:focus, select:focus { border-color: var(--accent); }
+  select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a7f8a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+  }
+  select option { background: var(--surface); color: var(--text); }
+
+  /* ── Buttons ─────────────────────────────────────────────────────────── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: var(--radius);
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all var(--transition);
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: var(--accent-text);
+    width: 100%;
+    justify-content: center;
+    font-weight: 600;
+  }
+  .btn-primary:hover { filter: brightness(1.1); }
+  .btn-primary:disabled { background: var(--accent-dim); color: var(--text-dim); cursor: not-allowed; filter: none; }
+
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+  .btn-ghost:hover { border-color: var(--text-muted); color: var(--text); }
+  .btn-ghost.active { border-color: var(--accent); color: var(--accent); }
+
+  .btn-submit {
+    background: var(--accent);
+    color: var(--accent-text);
+    font-weight: 600;
+    padding: 12px 28px;
+    border-radius: var(--radius);
+    display: inline-flex;
+    align-items: center;
+    transition: all var(--transition);
+  }
+  .btn-submit:hover { filter: brightness(1.1); }
+  .btn-submit:disabled { background: var(--surface-2); color: var(--text-dim); cursor: not-allowed; filter: none; }
+
+  .btn-danger-ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    padding: 6px 14px;
+    border-radius: var(--radius);
+    display: inline-flex;
+    align-items: center;
+    transition: all var(--transition);
+  }
+  .btn-danger-ghost:hover { border-color: var(--danger); color: var(--danger); }
+
+  /* ── Scoring view ────────────────────────────────────────────────────── */
+  .scoring-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .scoring-header h2 { font-size: 1.4rem; font-weight: 600; letter-spacing: -0.02em; }
+  .scoring-header .meta {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  /* ── Participant input bar ───────────────────────────────────────────── */
+  .participant-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 32px;
+    align-items: center;
+  }
+  .participant-bar input { flex: 1; max-width: 280px; }
+  .participant-bar .btn { white-space: nowrap; }
+
+  /* ── Stats strip ────────────────────────────────────────────────────── */
+  .stats-strip {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 24px;
+    padding: 16px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    flex-wrap: wrap;
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+  .stat { display: flex; flex-direction: column; gap: 2px; }
+  .stat .val { font-size: 1.3rem; font-weight: 600; color: var(--text); }
+  .stat .lbl { color: var(--text-muted); font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; }
+  .stat .val.warn { color: var(--warn); }
+  .stat .val.ok   { color: var(--accent); }
+
+  /* ── Table toolbar ──────────────────────────────────────────────────── */
+  .table-toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .filter-label { font-size: 0.8rem; color: var(--text-muted); margin-right: auto; font-family: var(--mono); }
+
+  /* ── Scores table ───────────────────────────────────────────────────── */
+  .table-wrap {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 24px;
+    transition: border-color 0.2s ease;
+  }
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    background: var(--surface);
+    padding: 10px 16px;
+    text-align: left;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  tbody tr { border-bottom: 1px solid var(--border-soft); transition: background var(--transition); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--surface); }
+  tbody tr.needs-review { background: rgba(244, 164, 74, 0.04); }
+  tbody tr.needs-review:hover { background: rgba(244, 164, 74, 0.08); }
+  td { padding: 12px 16px; font-size: 0.9rem; vertical-align: middle; }
+
+  .word-cell { font-family: var(--mono); font-weight: 500; color: var(--text); }
+
+  .conf-cell { font-family: var(--mono); font-size: 0.8rem; }
+  .conf-bar { display: flex; align-items: center; gap: 8px; }
+  .conf-track { flex: 1; max-width: 80px; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .conf-fill { height: 100%; border-radius: 2px; transition: width 0.3s ease; }
+  .conf-fill.high { background: var(--accent); }
+  .conf-fill.low  { background: var(--warn); }
+  .conf-val { min-width: 36px; }
+  .conf-val.low { color: var(--warn); }
+
+  .badge-review {
+    display: inline-block;
+    font-size: 0.65rem;
+    font-family: var(--mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 3px;
+    background: var(--warn-dim);
+    color: var(--warn);
+    border: 1px solid rgba(244,164,74,0.25);
+  }
+
+  /* ── Score toggle ───────────────────────────────────────────────────── */
+  .score-toggle { display: flex; gap: 4px; }
+  .toggle-btn {
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-family: var(--mono);
+    font-weight: 600;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all var(--transition);
+  }
+  .toggle-btn:hover { border-color: var(--text-muted); color: var(--text); }
+  .toggle-btn.selected-0 { background: var(--danger-dim); border-color: rgba(244,90,90,0.4); color: var(--danger); }
+  .toggle-btn.selected-1 { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+
+  /* ── Audio player ───────────────────────────────────────────────────── */
+  .play-btn {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition);
+    flex-shrink: 0;
+  }
+  .play-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .play-btn.playing { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+  .play-btn svg { width: 12px; height: 12px; }
+
+  /* ── Submit row ─────────────────────────────────────────────────────── */
+  .submit-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-top: 8px; }
+  .submit-note { font-size: 0.8rem; color: var(--text-muted); font-family: var(--mono); }
+
+  /* ── Loading overlay ────────────────────────────────────────────────── */
+  .loading-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(14,15,17,0.85);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+  }
+  [data-theme="light"] .loading-overlay { background: rgba(245,246,248,0.85); }
+  .loading-overlay.visible { display: flex; }
+  .loading-text { font-family: var(--mono); font-size: 1rem; color: var(--text-muted); }
+  .loading-text .blink { animation: blink 1.2s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .spinner {
+    width: 36px; height: 36px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Toast ──────────────────────────────────────────────────────────── */
+  .toast-container { position: fixed; bottom: 24px; right: 24px; display: flex; flex-direction: column; gap: 8px; z-index: 300; }
+  .toast {
+    padding: 12px 18px;
+    border-radius: var(--radius);
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    border: 1px solid;
+    animation: slideIn 0.2s ease;
+    max-width: 360px;
+  }
+  .toast.success { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+  .toast.error   { background: var(--danger-dim); border-color: rgba(244,90,90,0.4); color: var(--danger); }
+  .toast.warn    { background: var(--warn-dim);   border-color: rgba(244,164,74,0.4); color: var(--warn); }
+  @keyframes slideIn { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: translateX(0); } }
+
+  /* ── Empty state ────────────────────────────────────────────────────── */
+  .empty-state { padding: 48px; text-align: center; color: var(--text-dim); font-size: 0.85rem; font-family: var(--mono); }
+
+  /* ── Info modal ─────────────────────────────────────────────────────── */
+  .modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(3px);
+    z-index: 400;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .modal-backdrop.visible { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    width: 100%;
+    max-width: 580px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.4);
+    animation: modalIn 0.2s ease;
+  }
+  @keyframes modalIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .modal-title {
+    font-weight: 600;
+    font-size: 1rem;
+    letter-spacing: -0.01em;
+  }
+  .modal-close {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition);
+    font-size: 1rem;
+    line-height: 1;
+  }
+  .modal-close:hover { border-color: var(--danger); color: var(--danger); }
+
+  .modal-body {
+    padding: 20px 24px 24px;
+    overflow-y: auto;
+    line-height: 1.7;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+  .modal-body h3 {
+    font-size: 0.75rem;
+    font-family: var(--mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin: 20px 0 8px;
+  }
+  .modal-body h3:first-child { margin-top: 0; }
+  .modal-body p { margin-bottom: 10px; color: var(--text-muted); }
+  .modal-body p:last-child { margin-bottom: 0; }
+  .modal-body strong { color: var(--text); font-weight: 600; }
+  .modal-body .step {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 10px;
+    align-items: flex-start;
+  }
+  .modal-body .step-num {
+    flex-shrink: 0;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--accent-dim);
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2px;
+  }
+  .task-chip {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 3px;
+    border: 1px solid;
+    margin: 2px 3px;
+  }
+  .task-chip.green { background: rgba(74,244,176,0.1); border-color: rgba(74,244,176,0.3); color: #4af4b0; }
+  .task-chip.pink  { background: rgba(244,114,182,0.1); border-color: rgba(244,114,182,0.3); color: #f472b6; }
+  .task-chip.blue  { background: rgba(96,165,250,0.1); border-color: rgba(96,165,250,0.3); color: #60a5fa; }
+
+  /* ── Scrollbar ──────────────────────────────────────────────────────── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Header -->
+  <header>
+    <div class="header-left">
+      <div class="logo">Phono<span>Code</span></div>
+    </div>
+
+    <div class="header-right">
+      <!-- Session badge (hidden until logged in) -->
+      <div class="session-badge" id="sessionBadge">
+        <span id="badgeRA" class="pill active"></span>
+        <span id="badgeTask" class="pill active"></span>
+        <button class="btn btn-ghost" style="padding:4px 12px;font-size:0.75rem" onclick="resetSession()">Switch session</button>
+      </div>
+
+      <!-- Info button -->
+      <button class="icon-btn" onclick="openModal()" title="How to use PhonoCode" aria-label="Instructions">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="8" cy="8" r="6.5"/>
+          <path d="M8 7.5v4M8 5.5v.5"/>
+        </svg>
+      </button>
+
+      <!-- Theme toggle -->
+      <button class="icon-btn" id="themeToggle" onclick="toggleTheme()" title="Toggle light/dark mode" aria-label="Toggle theme">
+        <!-- icon swapped by JS -->
+      </button>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ── View: Login ─────────────────────────────────────────────── -->
+    <div class="view active" id="viewLogin">
+      <div class="login-wrap">
+        <div class="section-label">Scoring Interface</div>
+        <h1>Ready to score?</h1>
+        <p class="subtitle">Select a task and enter your initials to begin.</p>
+
+        <div class="form-group">
+          <label for="raInitials">Your initials</label>
+          <input type="text" id="raInitials" placeholder="e.g. AB" maxlength="5" autocomplete="off" />
+        </div>
+
+        <div class="form-group">
+          <label for="taskSelect">Task</label>
+          <select id="taskSelect">
+            <option value="">— Select a task —</option>
+            <option value="phoneme_reversal">Phoneme Reversal</option>
+            <option value="blending_nonwords">Blending Nonwords</option>
+            <option value="naart">NAART</option>
+          </select>
+        </div>
+
+        <button class="btn btn-primary" id="loginBtn" onclick="startSession()" disabled>
+          Load model &amp; continue →
+        </button>
+
+        <div id="loginError" style="margin-top:14px;font-family:var(--mono);font-size:0.78rem;color:var(--danger);display:none"></div>
+      </div>
+    </div>
+
+    <!-- ── View: Scoring ───────────────────────────────────────────── -->
+    <div class="view" id="viewScoring">
+
+      <div class="scoring-header">
+        <div>
+          <h2>Score Participant</h2>
+          <div class="meta" id="taskMeta"></div>
+        </div>
+      </div>
+
+      <div class="participant-bar">
+        <input type="text" id="participantId" placeholder="Participant ID (e.g. ReXa_090)"
+               autocomplete="off" onkeydown="if(event.key==='Enter')runScoring()" />
+        <button class="btn btn-primary" id="scoreBtn" onclick="runScoring()" style="width:auto">
+          Score →
+        </button>
+      </div>
+
+      <div id="resultsArea" style="display:none">
+
+        <div class="stats-strip" id="statsStrip"></div>
+
+        <div class="table-toolbar">
+          <span class="filter-label" id="filterLabel"></span>
+          <button class="btn btn-ghost" id="filterToggle" onclick="toggleFilter()">Show all scores</button>
+          <button class="btn-danger-ghost" id="clearBtn" onclick="clearResults()">Clear</button>
+        </div>
+
+        <div class="table-wrap">
+          <table id="scoresTable">
+            <thead>
+              <tr>
+                <th style="width:44px"></th>
+                <th>Word</th>
+                <th>Score</th>
+                <th>Confidence</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="scoresBody"></tbody>
+          </table>
+        </div>
+
+        <div class="submit-row">
+          <span class="submit-note" id="submitNote"></span>
+          <button class="btn btn-submit" id="submitBtn" onclick="submitScores()">
+            Submit scores →
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+</div>
+
+<!-- Loading overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loadingText">Loading<span class="blink">…</span></div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Audio element -->
+<audio id="globalAudio" preload="none"></audio>
+
+<!-- ── Info modal ──────────────────────────────────────────────────────── -->
+<div class="modal-backdrop" id="modalBackdrop" onclick="handleBackdropClick(event)">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-header">
+      <span class="modal-title" id="modalTitle">How to use PhonoCode</span>
+      <button class="modal-close" onclick="closeModal()" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <h3>Overview</h3>
+      <p>PhonoCode is a scoring interface for reviewing phonological task responses. The model scores each audio response automatically — your job is to review low-confidence predictions and correct them before submitting.</p>
+
+      <h3>Tasks</h3>
+      <p>
+        <span class="task-chip green">Phoneme Reversal</span>
+        <span class="task-chip pink">Blending Nonwords</span>
+        <span class="task-chip blue">NAART</span>
+      </p>
+      <p>Each task uses a separately trained model. Make sure you select the correct task before scoring.</p>
+
+      <h3>Step-by-step</h3>
+      <div class="step"><div class="step-num">1</div><div>Enter your initials and select the task. The model will load — this may take a moment the first time.</div></div>
+      <div class="step"><div class="step-num">2</div><div>Enter the participant ID (e.g. <strong>ReXa_090</strong>) and press <strong>Score →</strong>. The model will run inference on all audio files for that participant.</div></div>
+      <div class="step"><div class="step-num">3</div><div>The table loads filtered to items flagged <strong>Needs Review</strong> — predictions where model confidence is below 75%. These are the ones that need your attention.</div></div>
+      <div class="step"><div class="step-num">4</div><div>Click the <strong>▶ play button</strong> on any row to listen to the audio file. Use the <strong>0 / 1</strong> toggle to set or correct the score.</div></div>
+      <div class="step"><div class="step-num">5</div><div>Use <strong>Show all scores</strong> to see the full set of predictions and spot-check high-confidence items if needed.</div></div>
+      <div class="step"><div class="step-num">6</div><div>Once all items are scored, press <strong>Submit scores →</strong>. Scores are written to your RA log and the task log.</div></div>
+
+      <h3>Scoring guide</h3>
+      <p><strong>1</strong> = correct response &nbsp;·&nbsp; <strong>0</strong> = incorrect response</p>
+      <p>If audio is missing, unclear, or unscoreable, leave it unscored and note it separately. Do not guess.</p>
+
+      <h3>Notes</h3>
+      <p>Your session stays active until you click <strong>Switch session</strong>. You can score multiple participants without reloading the model.</p>
+      <p>If the server is unreachable, confirm you are connected to the lab VPN.</p>
+
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── State ─────────────────────────────────────────────────────────────── */
+const state = {
+  ra: null,
+  task: null,
+  participantId: null,
+  results: [],
+  scores: {},
+  showAll: false,
+  currentAudio: null,
+};
+
+const API = '';
+
+/* ── DOM helpers ──────────────────────────────────────────────────────── */
+const $ = id => document.getElementById(id);
+const show = id => $(id).style.display = '';
+const hide = id => $(id).style.display = 'none';
+
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  $(`view${name}`).classList.add('active');
+}
+
+/* ── Theme ────────────────────────────────────────────────────────────── */
+const MOON_ICON = `<svg viewBox="0 0 16 16" fill="currentColor"><path d="M14.5 10.6A6.5 6.5 0 0 1 5.4 1.5a6.5 6.5 0 1 0 9.1 9.1z"/></svg>`;
+const SUN_ICON  = `<svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="3"/><path stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none" d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3.1 3.1l1.1 1.1M11.8 11.8l1.1 1.1M12.9 3.1l-1.1 1.1M4.2 11.8l-1.1 1.1"/></svg>`;
+
+function getSystemTheme() {
+  return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  $('themeToggle').innerHTML = theme === 'dark' ? MOON_ICON : SUN_ICON;
+  localStorage.setItem('phonocode-theme', theme);
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  applyTheme(current === 'dark' ? 'light' : 'dark');
+}
+
+// Init theme from localStorage or system preference
+(function initTheme() {
+  const saved = localStorage.getItem('phonocode-theme');
+  applyTheme(saved || getSystemTheme());
+})();
+
+// Listen for system theme changes (in case browser preference changes while app is open)
+window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', e => {
+  if (!localStorage.getItem('phonocode-theme')) applyTheme(e.matches ? 'light' : 'dark');
+});
+
+/* ── Task accent ──────────────────────────────────────────────────────── */
+function applyTaskAccent(task) {
+  document.documentElement.setAttribute('data-task', task || '');
+}
+
+/* ── Info modal ───────────────────────────────────────────────────────── */
+function openModal() {
+  $('modalBackdrop').classList.add('visible');
+  document.addEventListener('keydown', handleModalKey);
+}
+function closeModal() {
+  $('modalBackdrop').classList.remove('visible');
+  document.removeEventListener('keydown', handleModalKey);
+}
+function handleBackdropClick(e) {
+  if (e.target === $('modalBackdrop')) closeModal();
+}
+function handleModalKey(e) {
+  if (e.key === 'Escape') closeModal();
+}
+
+/* ── Loading ──────────────────────────────────────────────────────────── */
+function setLoading(msg) {
+  $('loadingText').innerHTML = msg + '<span class="blink">…</span>';
+  $('loadingOverlay').classList.add('visible');
+}
+function clearLoading() {
+  $('loadingOverlay').classList.remove('visible');
+}
+
+/* ── Toast ────────────────────────────────────────────────────────────── */
+function toast(msg, type = 'success', duration = 3500) {
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  $('toastContainer').appendChild(el);
+  setTimeout(() => el.remove(), duration);
+}
+
+/* ── Login validation ─────────────────────────────────────────────────── */
+$('raInitials').addEventListener('input', validateLogin);
+$('taskSelect').addEventListener('change', validateLogin);
+
+function validateLogin() {
+  const ra   = $('raInitials').value.trim();
+  const task = $('taskSelect').value;
+  $('loginBtn').disabled = !(ra.length >= 1 && task);
+  // Preview task accent on the login screen
+  applyTaskAccent(task);
+}
+
+/* ── Start session ────────────────────────────────────────────────────── */
+async function startSession() {
+  const ra   = $('raInitials').value.trim().toUpperCase();
+  const task = $('taskSelect').value;
+
+  hide('loginError');
+  setLoading('Loading model for ' + task.replace(/_/g, ' '));
+
+  try {
+    const res  = await fetch(`${API}/api/session`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ra_initials: ra, task }),
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      clearLoading();
+      $('loginError').textContent = data.detail || 'Session error.';
+      show('loginError');
+      return;
+    }
+
+    state.ra   = ra;
+    state.task = task;
+
+    applyTaskAccent(task);
+
+    $('badgeRA').textContent   = ra;
+    $('badgeTask').textContent = task.replace(/_/g, ' ');
+    $('sessionBadge').classList.add('visible');
+    $('taskMeta').textContent  = `${task.replace(/_/g, ' ')} · ${data.words.length} target words`;
+
+    clearLoading();
+    showView('Scoring');
+    $('participantId').focus();
+
+  } catch (err) {
+    clearLoading();
+    $('loginError').textContent = 'Could not reach server. Is it running?';
+    show('loginError');
+  }
+}
+
+/* ── Run scoring ──────────────────────────────────────────────────────── */
+async function runScoring() {
+  const pid = $('participantId').value.trim();
+  if (!pid) { toast('Enter a participant ID.', 'warn'); return; }
+
+  stopAudio();
+  hide('resultsArea');
+  setLoading('Sit tight! Running inference on ' + pid);
+
+  try {
+    const res  = await fetch(`${API}/api/score`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ participant_id: pid }),
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      clearLoading();
+      toast(data.detail || 'Scoring failed.', 'error');
+      return;
+    }
+
+    state.participantId = data.participant_id;
+    state.results       = data.results;
+    state.showAll       = false;
+    state.scores        = {};
+    data.results.forEach(r => { state.scores[r.word] = r.score; });
+
+    clearLoading();
+    renderResults(data);
+
+    if (data.errors.length) {
+      toast(`${data.errors.length} file(s) skipped — check console`, 'warn');
+      console.warn('Scoring errors:', data.errors);
+    }
+
+  } catch (err) {
+    clearLoading();
+    toast('Network error: ' + err.message, 'error');
+  }
+}
+
+/* ── Render results ───────────────────────────────────────────────────── */
+function renderResults(data) {
+  const reviewCount = data.results.filter(r => r.needs_review).length;
+  const total       = data.results.length;
+
+  $('statsStrip').innerHTML = `
+    <div class="stat"><div class="val">${data.participant_id}</div><div class="lbl">Participant</div></div>
+    <div class="stat"><div class="val">${total}</div><div class="lbl">Words scored</div></div>
+    <div class="stat"><div class="val ${reviewCount > 0 ? 'warn' : 'ok'}">${reviewCount}</div><div class="lbl">Needs review</div></div>
+    <div class="stat"><div class="val">${(data.confidence_threshold * 100).toFixed(0)}%</div><div class="lbl">Conf. threshold</div></div>
+  `;
+
+  renderTable();
+  updateSubmitNote();
+  show('resultsArea');
+}
+
+/* ── Slug helper: turns any word into a safe HTML id ─────────────────── */
+function slugify(word) {
+  return word.replace(/[^a-z0-9]/gi, '-');
+}
+
+function renderTable() {
+  const filtered    = state.showAll ? state.results : state.results.filter(r => r.needs_review);
+  const reviewCount = state.results.filter(r => r.needs_review).length;
+
+  $('filterLabel').textContent    = state.showAll
+    ? `Showing all ${state.results.length} items`
+    : `Showing ${reviewCount} item${reviewCount !== 1 ? 's' : ''} needing review`;
+  $('filterToggle').textContent   = state.showAll ? 'Show needs review only' : 'Show all scores';
+  $('filterToggle').classList.toggle('active', state.showAll);
+
+  const tbody = $('scoresBody');
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state">No items to review — all scores above threshold.</div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(r => {
+    const currentScore = state.scores[r.word];
+    const conf         = r.confidence != null ? r.confidence : null;
+    const pct          = conf != null ? Math.round(conf * 100) : 0;
+    const isLow        = r.needs_review;
+    const slug         = slugify(r.word);
+
+    return `
+      <tr class="${isLow ? 'needs-review' : ''}" id="row-${slug}">
+        <td>
+          <button class="play-btn" id="play-${slug}"
+                  data-word="${r.word}"
+                  data-filename="${r.audio_file}"
+                  title="Play ${r.word}">
+            ${playIcon()}
+          </button>
+        </td>
+        <td class="word-cell">${r.word}</td>
+        <td>
+          <div class="score-toggle">
+            <button class="toggle-btn ${currentScore === 0 ? 'selected-0' : ''}"
+                    data-word="${r.word}"
+                    data-val="0">0</button>
+            <button class="toggle-btn ${currentScore === 1 ? 'selected-1' : ''}"
+                    data-word="${r.word}"
+                    data-val="1">1</button>
+          </div>
+        </td>
+        <td class="conf-cell">
+          ${conf != null ? `
+            <div class="conf-bar">
+              <div class="conf-track">
+                <div class="conf-fill ${isLow ? 'low' : 'high'}" style="width:${pct}%"></div>
+              </div>
+              <span class="conf-val ${isLow ? 'low' : ''}">${pct}%</span>
+            </div>
+          ` : '<span style="color:var(--text-dim)">—</span>'}
+        </td>
+        <td>${isLow ? '<span class="badge-review">Needs review</span>' : ''}</td>
+      </tr>
+    `;
+  }).join('');
+
+  // Attach click handlers via JS — avoids inline onclick with special characters
+  tbody.querySelectorAll('.play-btn').forEach(btn => {
+    btn.addEventListener('click', () => toggleAudio(btn.dataset.word, btn.dataset.filename));
+  });
+  tbody.querySelectorAll('.toggle-btn').forEach(btn => {
+    btn.addEventListener('click', () => setScore(btn.dataset.word, parseInt(btn.dataset.val)));
+  });
+}
+
+function playIcon()  { return `<svg viewBox="0 0 12 12" fill="currentColor"><polygon points="3,1 11,6 3,11"/></svg>`; }
+function pauseIcon() { return `<svg viewBox="0 0 12 12" fill="currentColor"><rect x="2" y="1" width="3" height="10"/><rect x="7" y="1" width="3" height="10"/></svg>`; }
+
+/* ── Score toggle ─────────────────────────────────────────────────────── */
+function setScore(word, val) {
+  state.scores[word] = val;
+  const slug = slugify(word);
+  const row  = document.getElementById(`row-${slug}`);
+  if (!row) return;
+  const btns = row.querySelectorAll('.toggle-btn');
+  btns[0].className = `toggle-btn ${val === 0 ? 'selected-0' : ''}`;
+  btns[1].className = `toggle-btn ${val === 1 ? 'selected-1' : ''}`;
+  updateSubmitNote();
+}
+
+function updateSubmitNote() {
+  const nullCount = Object.values(state.scores).filter(v => v == null).length;
+  $('submitNote').textContent = nullCount > 0
+    ? `${nullCount} word${nullCount > 1 ? 's' : ''} unscored`
+    : `All words scored`;
+  $('submitBtn').disabled = nullCount > 0;
+}
+
+/* ── Filter toggle ────────────────────────────────────────────────────── */
+function toggleFilter() {
+  state.showAll = !state.showAll;
+  renderTable();
+}
+
+/* ── Audio ────────────────────────────────────────────────────────────── */
+const audioEl = $('globalAudio');
+
+audioEl.addEventListener('ended', () => {
+  if (state.currentAudio) {
+    const btn = document.getElementById(`play-${slugify(state.currentAudio)}`);
+    if (btn) { btn.classList.remove('playing'); btn.innerHTML = playIcon(); }
+    state.currentAudio = null;
+  }
+});
+
+function toggleAudio(word, filename) {
+  if (state.currentAudio === word) { stopAudio(); return; }
+  stopAudio();
+  state.currentAudio = word;
+  audioEl.src = `${API}/api/audio/${state.participantId}/${encodeURIComponent(filename)}`;
+  audioEl.play().catch(e => toast('Audio playback error: ' + e.message, 'error'));
+  const btn = document.getElementById(`play-${slugify(word)}`);
+  if (btn) { btn.classList.add('playing'); btn.innerHTML = pauseIcon(); }
+}
+
+function stopAudio() {
+  if (state.currentAudio) {
+    audioEl.pause();
+    audioEl.src = '';
+    const btn = document.getElementById(`play-${slugify(state.currentAudio)}`);
+    if (btn) { btn.classList.remove('playing'); btn.innerHTML = playIcon(); }
+    state.currentAudio = null;
+  }
+}
+
+/* ── Submit ───────────────────────────────────────────────────────────── */
+async function submitScores() {
+  stopAudio();
+  setLoading('Saving scores');
+
+  try {
+    const res  = await fetch(`${API}/api/submit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ra_initials:    state.ra,
+        task:           state.task,
+        participant_id: state.participantId,
+        scores:         state.scores,
+      }),
+    });
+    const data = await res.json();
+    clearLoading();
+
+    if (!res.ok) { toast(data.detail || 'Submit failed.', 'error'); return; }
+
+    toast(`Scores saved for ${state.participantId}`, 'success');
+    clearResults();
+
+  } catch (err) {
+    clearLoading();
+    toast('Submit error: ' + err.message, 'error');
+  }
+}
+
+/* ── Clear / reset ────────────────────────────────────────────────────── */
+function clearResults() {
+  stopAudio();
+  state.results       = [];
+  state.scores        = {};
+  state.participantId = null;
+  hide('resultsArea');
+  $('participantId').value = '';
+  $('participantId').focus();
+}
+
+function resetSession() {
+  stopAudio();
+  clearResults();
+  state.ra   = null;
+  state.task = null;
+  $('sessionBadge').classList.remove('visible');
+  $('raInitials').value  = '';
+  $('taskSelect').value  = '';
+  hide('loginError');
+  $('loginBtn').disabled = true;
+  applyTaskAccent('');
+  showView('Login');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+Phoneme Reversal Final Deployment Model
+==================================================
+
+Encoder:            facebook/wav2vec2-base-960h (frozen)
+MLP:                Linear(1537->128) ReLU Dropout(0.2) Linear(128->64) ReLU Dropout(0.3) Linear(64->2)
+Input dim:          1537  (1536 hybrid-pooled + 1 difficulty)
+LR:                 1.0e-04  WD: 2.0e-04
+Augment copies:     2
+Best epoch:         33 / 48
+Deploy threshold:   0.4
+SKIP_WORDS:         ['an']
+
+Training participants (163):
+  ['ReXa_004', 'ReXa_006', 'ReXa_008', 'ReXa_009', 'ReXa_015', 'ReXa_016', 'ReXa_018', 'ReXa_025', 'ReXa_030', 'ReXa_034', 'ReXa_061', 'ReXa_067', 'ReXa_071', 'ReXa_076', 'ReXa_083', 'ReXa_084', 'ReXa_087', 'ReXa_090', 'ReXa_091', 'ReXa_093', 'ReXa_095', 'ReXa_098', 'ReXa_100', 'ReXa_102', 'ReXa_105', 'ReXa_106', 'ReXa_107', 'ReXa_108', 'ReXa_109', 'ReXa_110', 'ReXa_111', 'ReXa_114', 'ReXa_116', 'ReXa_118', 'ReXa_120', 'ReXa_121', 'ReXa_122', 'ReXa_123', 'ReXa_125', 'ReXa_127', 'ReXa_128', 'ReXa_129', 'ReXa_130', 'ReXa_131', 'ReXa_134', 'ReXa_135', 'ReXa_136', 'ReXa_140', 'ReXa_142', 'ReXa_144', 'ReXa_145', 'ReXa_146', 'ReXa_147', 'ReXa_148', 'ReXa_149', 'ReXa_150', 'ReXa_151', 'ReXa_152', 'ReXa_155', 'ReXa_158', 'ReXa_159', 'ReXa_161', 'ReXa_162', 'ReXa_163', 'ReXa_164', 'ReXa_165', 'ReXa_166', 'ReXa_167', 'ReXa_169', 'ReXa_170', 'ReXa_171', 'ReXa_172', 'ReXa_173', 'ReXa_176', 'ReXa_177', 'ReXa_179', 'ReXa_181', 'ReXa_183', 'ReXa_187', 'ReXa_190', 'ReXa_192', 'ReXa_194', 'ReXa_199', 'ReXa_200', 'ReXa_201', 'ReXa_203', 'ReXa_204', 'ReXa_207', 'ReXa_208', 'ReXa_209', 'ReXa_211', 'ReXa_214', 'ReXa_215', 'ReXa_217', 'ReXa_221', 'ReXa_222', 'ReXa_224', 'ReXa_226', 'ReXa_227', 'ReXa_229', 'ReXa_230', 'ReXa_233', 'ReXa_234', 'ReXa_235', 'ReXa_237', 'ReXa_238', 'ReXa_240', 'ReXa_244', 'ReXa_245', 'ReXa_246', 'ReXa_247', 'ReXa_248', 'ReXa_251', 'ReXa_252', 'ReXa_253', 'ReXa_254', 'ReXa_255', 'ReXa_256', 'ReXa_258', 'ReXa_260', 'ReXa_261', 'ReXa_262', 'ReXa_264', 'ReXa_266', 'ReXa_267', 'ReXa_272', 'ReXa_273', 'ReXa_275', 'ReXa_276', 'ReXa_278', 'ReXa_279', 'ReXa_280', 'ReXa_281', 'ReXa_282', 'ReXa_284', 'ReXa_286', 'ReXa_287', 'ReXa_290', 'ReXa_293', 'ReXa_296', 'ReXa_300', 'ReXa_301', 'ReXa_303', 'ReXa_304', 'ReXa_305', 'ReXa_306', 'ReXa_307', 'ReXa_311', 'ReXa_312', 'ReXa_313', 'ReXa_314', 'ReXa_316', 'ReXa_321', 'ReXa_323', 'ReXa_324', 'ReXa_326', 'ReXa_328', 'ReXa_330', 'ReXa_333', 'ReXa_336', 'ReXa_338', 'ReXa_339', 'ReXa_342']
+
+ES holdout ONLY — NOT evaluation data (18):
+  ['ReXa_024', 'ReXa_092', 'ReXa_101', 'ReXa_119', 'ReXa_137', 'ReXa_138', 'ReXa_141', 'ReXa_143', 'ReXa_153', 'ReXa_157', 'ReXa_189', 'ReXa_205', 'ReXa_249', 'ReXa_269', 'ReXa_285', 'ReXa_327', 'ReXa_340', 'ReXa_343']
+
+ES holdout bal_acc at best epoch: 0.8699
+
+NOTE: Generalisation estimates come from cv_aggregate_results.txt
+      produced by phoneme-reversal_train.py (cv1).  This script
+      does not produce evaluation metrics — it produces the
+      deployment artifact.
