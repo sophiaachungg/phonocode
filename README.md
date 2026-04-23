@@ -171,7 +171,7 @@ Participant response (.wav)        Reference recording (.wav)
 
 ## Stimulus Difficulty Weighting
 
-Not all stimuli are equally informative. Stimuli vary in phonological complexity, and harder items are weighted more heavily during training across all three tasks. Difficulty tiers are derived from per-stimulus base-rate correct in the ground truth data. Sample weights during training are the product of the class weight and the difficulty weight for each item, then normalized to unit mean.
+Not all stimuli are equally informative. Stimuli vary in phonological complexity, and harder items are weighted more heavily during training across all three tasks. Difficulty tiers are derived from per-stimulus base-rate correct in the ground truth data. Sample weights during training are the product of the class weight and the difficulty weight for each item, then normalized to unit mean. This feature was inspired by my own experience of running hundreds of participants over the past 3 years and keeping myself entertained during manual scoring by guessing whether participants would get upcoming items correct based on their track record so far. This feature improved the model's prediction abilitiles tremendously.
 
 ---
 
@@ -239,7 +239,7 @@ All tasks are evaluated using 5-fold participant-grouped cross-validation. All s
 | **Std** | **0.019** | **0.020** | **0.020** | **0.033** | **0.020** | — |
 
 > **Class 0** = incorrect response. **Class 1** = correct response.
-> Balanced accuracy is the primary metric; class-0 recall is the primary clinical signal.
+> Balanced accuracy is the primary metric.
 
 **Logistic regression baseline:** Acc = 0.868 ± 0.016, Macro F1 = 0.862 ± 0.017
 
@@ -420,6 +420,15 @@ python naart_train_final.py
 # Blending nonwords
 python blending_nonwords_train_final.py
 ```
+
+--- 
+
+## Next Steps
+
+1. **The models are not great at labeling 0s.** The models prove to be reliable for classifying true positives but does not excel at true negatives. Currently, I'm not sure the culprit is necessary class imbalance, but some experimentation here could make a real difference in model deployment.
+2. **The confidence scores are not perfect and could use some improvement.** In the lab, we actually use 3 labels - 1 for correct, 0 for incorrect, and NA if the participant accidentally skipped the stimulus or the recording is extremely ambiguous. In this case, I sacrificed the NA label and defaulted to labeling it 0 in the ground truth. The goal here was for the model to learn to mark audio files that used to be NA as 0 and/or with low confidence. 
+3. **The Explainable AI (XAI) aspects could be expanded upon.** In [Akman and Schuller, 2024](https://spj.science.org/doi/10.34133/icomputing.0074) there's an example of applying classic XAI techniques such as Grad-CAM, LIME, and SHAP on spectrograms generated from .wav files. There are also emerging techniques such as [X-ASR](https://arxiv.org/abs/2302.14062). Alternatively, the waveforms can be converted to specific values and summary statistics corresponding to concepts for the sake of counterfactual and other concept-based XAI approaches.
+4. **This project can be expanded to other phonological tasks.** In the lab, we also do a pseudoword repetition task that takes a significant amount of time to manually score since it is not a matter of 0/1 but is a measure of the syllable streak and the total syllables correct. This task would most likely require audio transformers built for extracting and classifying granular phonemes, rather than full words.
 
 ---
 
