@@ -19,6 +19,7 @@ PhonoCode currently supports three tasks: **phoneme reversal**, **NAART**, and *
 - [Model Performance](#model-performance)
 - [Data](#data)
 - [Installation](#installation)
+- [Repository Structure](#repository-structure)
 - [Usage](#usage)
 
 ---
@@ -261,17 +262,18 @@ Included for reference. The current run uses inverse-frequency class weights and
 
 | Fold | Accuracy | Balanced Acc | Macro F1 | Cl0 Recall | Cl1 Recall | Threshold |
 |:----:|:--------:|:------------:|:--------:|:----------:|:----------:|:---------:|
-| 1 | — | — | — | — | — | — |
-| 2 | — | — | — | — | — | — |
-| 3 | — | — | — | — | — | — |
-| 4 | — | — | — | — | — | — |
-| 5 | — | — | — | — | — | — |
-| **Mean** | **—** | **—** | **—** | **—** | **—** | — |
-| **Std** | **—** | **—** | **—** | **—** | **—** | — |
+| 1 | 0.844 | 0.850 | 0.829 | 0.867 | 0.834 | 0.5 |
+| 2 | 0.843 | 0.834 | 0.831 | 0.804 | 0.865 | 0.5 |
+| 3 | 0.842 | 0.831 | 0.832 | 0.781 | 0.880 | 0.5 |
+| 4 | 0.867 | 0.857 | 0.854 | 0.827 | 0.888 | 0.5 |
+| 5 | 0.853 | 0.839 | 0.831 | 0.804 | 0.874 | 0.5 |
+| **Mean** | **0.850** | **0.842** | **0.835** | **0.816** | **0.868** | — |
+| **Std** | **0.011** | **0.011** | **0.010** | **0.032** | **0.021** | — |
 
 > **Class 0** = incorrect pronunciation. **Class 1** = correct pronunciation.
+> Balanced accuracy is the primary metric; class-0 recall is the primary clinical signal.
 
-**Logistic regression baseline:** Acc = — ± —, Macro F1 = — ± —
+**Logistic regression baseline:** Acc = 0.839 ± 0.014, Macro F1 = 0.826 ± 0.013
 
 ---
 
@@ -279,16 +281,21 @@ Included for reference. The current run uses inverse-frequency class weights and
 
 Evaluated using the WavLM similarity + LR pipeline. The MLP was also evaluated in cross-validation but showed a consistent train/val gap at this N; LR is used in production.
 
-| Metric | Mean | Std |
-|---|---|---|
-| Accuracy | 0.845 | 0.026 |
-| Balanced Acc | 0.839 | 0.027 |
-| Macro F1 | 0.837 | 0.028 |
-| Class-0 Recall | 0.816 | 0.042 |
-| Class-1 Recall | 0.861 | 0.049 |
+| Fold | Accuracy | Balanced Acc | Macro F1 | Cl0 Recall | Cl1 Recall | Threshold |
+|:----:|:--------:|:------------:|:--------:|:----------:|:----------:|:---------:|
+| 1 | 0.859 | 0.849 | 0.853 | 0.789 | 0.910 | 0.5 |
+| 2 | 0.828 | 0.827 | 0.822 | 0.821 | 0.832 | 0.5 |
+| 3 | 0.842 | 0.850 | 0.836 | 0.882 | 0.818 | 0.5 |
+| 4 | 0.880 | 0.868 | 0.872 | 0.819 | 0.918 | 0.5 |
+| 5 | 0.802 | 0.799 | 0.800 | 0.771 | 0.827 | 0.5 |
+| **Mean** | **0.842** | **0.839** | **0.837** | **0.816** | **0.861** | — |
+| **Std** | **0.030** | **0.027** | **0.028** | **0.042** | **0.049** | — |
 
 > **Class 0** = incorrect blend. **Class 1** = correct blend.
+> Balanced accuracy is the primary metric; class-0 recall is the primary clinical signal.
 > Results are from the Stage 2 WavLM similarity CV run (141 participants).
+
+**Logistic regression baseline:** Acc = 0.845 ± 0.026, Macro F1 = 0.839 ± 0.024
 
 ---
 
@@ -325,6 +332,55 @@ numpy
 matplotlib
 soundfile
 tqdm
+```
+
+---
+
+## Repository Structure
+
+```
+phonocode/
+├── app/                            ← scoring web server
+│   ├── inference/
+│   │   ├── __init__.py
+│   │   ├── blending_nonwords.py
+│   │   ├── naart.py
+│   │   └── phoneme_reversal.py
+│   ├── static/
+│   │   └── index.html
+│   ├── README.md                   ← README for the web app
+│   └── server.py
+├── code/
+│   ├── 01-preprocess_audio/
+│   │   ├── blending-nonwords_from_csv.py
+│   │   ├── naart_from_csv.py
+│   │   └── phoneme-reversal_from_csv.py
+│   ├── 02-train/
+│   │   ├── experiment_5foldcv/
+│   │   │   ├── blending-nonwords_train.py
+│   │   │   ├── naart_train.py
+│   │   │   └── phoneme-reversal_train.py
+│   │   └── final_training/
+│   │       ├── blending_nonwords_train_final.py
+│   │       ├── naart_train_final.py
+│   │       └── phoneme_reversal_train_final.py
+│   ├── 03-evaluate/
+│   │       ├── inference_blending-nonwords.py ← same as app/inference/blending-nonwords.py
+│   │       ├── inference_naart.py
+│   │       └── inference_phoneme-reversal.py
+│   └── 04-xai/
+│       ├── xai_attention_rollout.py
+│       └── xai_results_all_folds/  ← results from XAI analysis on phoneme reversal task
+├── data/
+│   ├── processed/                  ← .wav files all housed in a participant folder (e.g., ReXa_123)
+│   ├── raw/                        ← original CSVs exported from Gorilla with base64 encoding of recordings
+│   └── reference_recordings/       ← canonical blending nonwords recordings
+├── logs/                           ← RA scoring logs (created on first submit on app)
+├── models/
+│   ├── blending-nonwords_final_model.pkl
+│   ├── naart_final_model.pt
+│   └── phoneme-reversal_final_model.pt
+└── README.md
 ```
 
 ---
