@@ -314,7 +314,7 @@ The ground truth labels (correct / incorrect per participant × stimulus) were m
 ## Installation
 
 ```bash
-git clone https://github.com/<your-org>/phonocode.git
+git clone https://github.com/sophiaachungg/phonocode.git
 cd phonocode
 pip install -r requirements.txt
 ```
