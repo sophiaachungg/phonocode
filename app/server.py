@@ -80,18 +80,18 @@ REF_ROOT = PROJECT_ROOT / "data" / "reference_recordings"
 TASK_CONFIG = {
     "phoneme_reversal": {
         "data_subdir": "phoneme_reversal",
-        "model_path":  Path("../models/phoneme-reversal_final_model.pt"),
+        "model_path":  MODEL_ROOT / "phoneme-reversal_final_model.pt",
         "scorer_class": "phoneme_reversal",
     },
     "naart": {
         "data_subdir": "naart",
-        "model_path":  Path("../models/naart_final_model.pt"),
+        "model_path":  MODEL_ROOT / "naart_final_model.pt",
         "scorer_class": "naart",
     },
     "blending_nonwords": {
         "data_subdir": "blending_nonwords",
-        "model_path":  Path("../models/blending-nonwords_final_model.pkl"),
-        "ref_root":    Path("../data/reference_recordings/blending_nonwords"),
+        "model_path":  MODEL_ROOT / "blending-nonwords_final_model.pkl",
+        "ref_root":    REF_ROOT / "blending_nonwords",
         "scorer_class": "blending_nonwords",
     },
 }
