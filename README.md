@@ -19,6 +19,7 @@ PhonoCode currently supports three tasks: **phoneme reversal**, **NAART**, and *
 - [Model Performance](#model-performance)
 - [Data](#data)
 - [Installation](#installation)
+- [Repository Structure](#repository-structure)
 - [Usage](#usage)
 
 ---
@@ -170,7 +171,7 @@ Participant response (.wav)        Reference recording (.wav)
 
 ## Stimulus Difficulty Weighting
 
-Not all stimuli are equally informative. Stimuli vary in phonological complexity, and harder items are weighted more heavily during training across all three tasks. Difficulty tiers are derived from per-stimulus base-rate correct in the ground truth data. Sample weights during training are the product of the class weight and the difficulty weight for each item, then normalized to unit mean.
+Not all stimuli are equally informative. Stimuli vary in phonological complexity, and harder items are weighted more heavily during training across all three tasks. Difficulty tiers are derived from per-stimulus base-rate correct in the ground truth data. Sample weights during training are the product of the class weight and the difficulty weight for each item, then normalized to unit mean. This feature was inspired by my own experience of running hundreds of participants over the past 3 years and keeping myself entertained during manual scoring by guessing whether participants would get upcoming items correct based on their track record so far. This feature improved the model's prediction abilitiles tremendously.
 
 ---
 
@@ -229,18 +230,18 @@ All tasks are evaluated using 5-fold participant-grouped cross-validation. All s
 
 | Fold | Accuracy | Balanced Acc | Macro F1 | Cl0 Recall | Cl1 Recall | Threshold |
 |:----:|:--------:|:------------:|:--------:|:----------:|:----------:|:---------:|
-| 1 | — | — | — | — | — | — |
-| 2 | — | — | — | — | — | — |
-| 3 | — | — | — | — | — | — |
-| 4 | — | — | — | — | — | — |
-| 5 | — | — | — | — | — | — |
-| **Mean** | **—** | **—** | **—** | **—** | **—** | — |
-| **Std** | **—** | **—** | **—** | **—** | **—** | — |
+| 1 | 0.873 | 0.859 | 0.863 | 0.804 | 0.914 | 0.5 |
+| 2 | 0.867 | 0.863 | 0.857 | 0.851 | 0.875 | 0.5 |
+| 3 | 0.875 | 0.870 | 0.869 | 0.850 | 0.890 | 0.5 |
+| 4 | 0.860 | 0.852 | 0.854 | 0.807 | 0.896 | 0.5 |
+| 5 | 0.909 | 0.903 | 0.903 | 0.881 | 0.926 | 0.5 |
+| **Mean** | **0.877** | **0.870** | **0.869** | **0.839** | **0.900** | — |
+| **Std** | **0.019** | **0.020** | **0.020** | **0.033** | **0.020** | — |
 
 > **Class 0** = incorrect response. **Class 1** = correct response.
-> Balanced accuracy is the primary metric; class-0 recall is the primary clinical signal.
+> Balanced accuracy is the primary metric.
 
-**Logistic regression baseline:** Acc = — ± —, Macro F1 = — ± —
+**Logistic regression baseline:** Acc = 0.868 ± 0.016, Macro F1 = 0.862 ± 0.017
 
 #### Previous Run (36 Participants, hardcoded class weights, val_loss checkpoint selection)
 
@@ -261,17 +262,18 @@ Included for reference. The current run uses inverse-frequency class weights and
 
 | Fold | Accuracy | Balanced Acc | Macro F1 | Cl0 Recall | Cl1 Recall | Threshold |
 |:----:|:--------:|:------------:|:--------:|:----------:|:----------:|:---------:|
-| 1 | — | — | — | — | — | — |
-| 2 | — | — | — | — | — | — |
-| 3 | — | — | — | — | — | — |
-| 4 | — | — | — | — | — | — |
-| 5 | — | — | — | — | — | — |
-| **Mean** | **—** | **—** | **—** | **—** | **—** | — |
-| **Std** | **—** | **—** | **—** | **—** | **—** | — |
+| 1 | 0.844 | 0.850 | 0.829 | 0.867 | 0.834 | 0.5 |
+| 2 | 0.843 | 0.834 | 0.831 | 0.804 | 0.865 | 0.5 |
+| 3 | 0.842 | 0.831 | 0.832 | 0.781 | 0.880 | 0.5 |
+| 4 | 0.867 | 0.857 | 0.854 | 0.827 | 0.888 | 0.5 |
+| 5 | 0.853 | 0.839 | 0.831 | 0.804 | 0.874 | 0.5 |
+| **Mean** | **0.850** | **0.842** | **0.835** | **0.816** | **0.868** | — |
+| **Std** | **0.011** | **0.011** | **0.010** | **0.032** | **0.021** | — |
 
 > **Class 0** = incorrect pronunciation. **Class 1** = correct pronunciation.
+> Balanced accuracy is the primary metric; class-0 recall is the primary clinical signal.
 
-**Logistic regression baseline:** Acc = — ± —, Macro F1 = — ± —
+**Logistic regression baseline:** Acc = 0.839 ± 0.014, Macro F1 = 0.826 ± 0.013
 
 ---
 
@@ -279,16 +281,21 @@ Included for reference. The current run uses inverse-frequency class weights and
 
 Evaluated using the WavLM similarity + LR pipeline. The MLP was also evaluated in cross-validation but showed a consistent train/val gap at this N; LR is used in production.
 
-| Metric | Mean | Std |
-|---|---|---|
-| Accuracy | 0.845 | 0.026 |
-| Balanced Acc | 0.839 | 0.027 |
-| Macro F1 | 0.837 | 0.028 |
-| Class-0 Recall | 0.816 | 0.042 |
-| Class-1 Recall | 0.861 | 0.049 |
+| Fold | Accuracy | Balanced Acc | Macro F1 | Cl0 Recall | Cl1 Recall | Threshold |
+|:----:|:--------:|:------------:|:--------:|:----------:|:----------:|:---------:|
+| 1 | 0.859 | 0.849 | 0.853 | 0.789 | 0.910 | 0.5 |
+| 2 | 0.828 | 0.827 | 0.822 | 0.821 | 0.832 | 0.5 |
+| 3 | 0.842 | 0.850 | 0.836 | 0.882 | 0.818 | 0.5 |
+| 4 | 0.880 | 0.868 | 0.872 | 0.819 | 0.918 | 0.5 |
+| 5 | 0.802 | 0.799 | 0.800 | 0.771 | 0.827 | 0.5 |
+| **Mean** | **0.842** | **0.839** | **0.837** | **0.816** | **0.861** | — |
+| **Std** | **0.030** | **0.027** | **0.028** | **0.042** | **0.049** | — |
 
 > **Class 0** = incorrect blend. **Class 1** = correct blend.
+> Balanced accuracy is the primary metric; class-0 recall is the primary clinical signal.
 > Results are from the Stage 2 WavLM similarity CV run (141 participants).
+
+**Logistic regression baseline:** Acc = 0.845 ± 0.026, Macro F1 = 0.839 ± 0.024
 
 ---
 
@@ -307,7 +314,7 @@ The ground truth labels (correct / incorrect per participant × stimulus) were m
 ## Installation
 
 ```bash
-git clone https://github.com/<your-org>/phonocode.git
+git clone https://github.com/sophiaachungg/phonocode.git
 cd phonocode
 pip install -r requirements.txt
 ```
@@ -325,6 +332,55 @@ numpy
 matplotlib
 soundfile
 tqdm
+```
+
+---
+
+## Repository Structure
+
+```
+phonocode/
+├── app/                            ← scoring web server
+│   ├── inference/
+│   │   ├── __init__.py
+│   │   ├── blending_nonwords.py
+│   │   ├── naart.py
+│   │   └── phoneme_reversal.py
+│   ├── static/
+│   │   └── index.html
+│   ├── README.md                   ← README for the web app
+│   └── server.py
+├── code/
+│   ├── 01-preprocess_audio/
+│   │   ├── blending-nonwords_from_csv.py
+│   │   ├── naart_from_csv.py
+│   │   └── phoneme-reversal_from_csv.py
+│   ├── 02-train/
+│   │   ├── experiment_5foldcv/
+│   │   │   ├── blending-nonwords_train.py
+│   │   │   ├── naart_train.py
+│   │   │   └── phoneme-reversal_train.py
+│   │   └── final_training/
+│   │       ├── blending_nonwords_train_final.py
+│   │       ├── naart_train_final.py
+│   │       └── phoneme_reversal_train_final.py
+│   ├── 03-evaluate/
+│   │       ├── inference_blending-nonwords.py ← same as app/inference/blending-nonwords.py
+│   │       ├── inference_naart.py
+│   │       └── inference_phoneme-reversal.py
+│   └── 04-xai/
+│       ├── xai_attention_rollout.py
+│       └── xai_results_all_folds/  ← results from XAI analysis on phoneme reversal task
+├── data/
+│   ├── processed/                  ← .wav files all housed in a participant folder (e.g., ReXa_123)
+│   ├── raw/                        ← original CSVs exported from Gorilla with base64 encoding of recordings
+│   └── reference_recordings/       ← canonical blending nonwords recordings
+├── logs/                           ← RA scoring logs (created on first submit on app)
+├── models/
+│   ├── blending-nonwords_final_model.pkl
+│   ├── naart_final_model.pt
+│   └── phoneme-reversal_final_model.pt
+└── README.md
 ```
 
 ---
@@ -364,6 +420,16 @@ python naart_train_final.py
 # Blending nonwords
 python blending_nonwords_train_final.py
 ```
+
+--- 
+
+## Next Steps
+
+1. **The models are not great at labeling 0s.** The models prove to be reliable for classifying true positives but does not excel at true negatives. Currently, I'm not sure the culprit is necessary class imbalance, but some experimentation here could make a real difference in model deployment.
+2. **The confidence scores are not perfect and could use some improvement.** In the lab, we actually use 3 labels - 1 for correct, 0 for incorrect, and NA if the participant accidentally skipped the stimulus or the recording is extremely ambiguous. In this case, I sacrificed the NA label and defaulted to labeling it 0 in the ground truth. The goal here was for the model to learn to mark audio files that used to be NA as 0 and/or with low confidence. 
+3. **The Explainable AI (XAI) aspects could be expanded upon.** In [Akman and Schuller, 2024](https://spj.science.org/doi/10.34133/icomputing.0074) there's an example of applying classic XAI techniques such as Grad-CAM, LIME, and SHAP on spectrograms generated from .wav files. There are also emerging techniques such as [X-ASR](https://arxiv.org/abs/2302.14062). Alternatively, the waveforms can be converted to specific values and summary statistics corresponding to concepts for the sake of counterfactual and other concept-based XAI approaches.
+4. **This project can be expanded to other phonological tasks.** In the lab, we also do a pseudoword repetition task that takes a significant amount of time to manually score since it is not a matter of 0/1 but is a measure of the syllable streak and the total syllables correct. This task would most likely require audio transformers built for extracting and classifying granular phonemes, rather than full words.
+5. **This project can be applied to audio from child/teen participants.** In the lab, our child/teen participants often complete the same phonological tasks as adults do (minus NAART). Since audio transformers are typically trained on adult speakers, models don't always generalize well to children. Fine-tuning these foundation models for use with child speakers could be a particularly useful contribution to the audio transformer field, as well as developmental linguistics.
 
 ---
 
