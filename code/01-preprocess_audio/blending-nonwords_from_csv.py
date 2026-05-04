@@ -74,8 +74,8 @@ from tqdm import tqdm
 # Configuration
 # ---------------------------------------------------------------------------
 TARGET_SR            = 16000
-DEFAULT_OUTPUT_DIR   = Path("../data_processed/blending_nonwords")
-DEFAULT_GROUND_TRUTH = Path("ground_truth_blending_nonwords.csv")
+DEFAULT_OUTPUT_DIR   = Path("../data/processed/blending_nonwords")
+DEFAULT_GROUND_TRUTH = Path("../data/raw/blending_nonwords.csv")
 EXPECTED_N_TRIALS    = 24
 
 # Canonical item-number → stimulus mapping (1-indexed, fixed blending nonwords order)

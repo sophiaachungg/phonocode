@@ -54,7 +54,7 @@ from sklearn.metrics import (
 import torchaudio.functional as TAF
 
 # ---------- CONFIG ----------
-AUDIO_ROOT       = Path("../data_processed/naart")
+AUDIO_ROOT       = Path("../data/processed/naart")
 GROUND_TRUTH_CSV = Path("../scoring/naart_ground_truth.csv")
 
 MODEL_ID    = "facebook/wav2vec2-base-960h"

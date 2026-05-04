@@ -64,7 +64,7 @@ from tqdm import tqdm
 # Configuration
 # ---------------------------------------------------------------------------
 TARGET_SR          = 16000
-DEFAULT_OUTPUT_DIR = Path("../data_processed/phoneme_reversal")
+DEFAULT_OUTPUT_DIR = Path("../data/processed/phoneme_reversal")
 EXPECTED_N_TRIALS  = 22
 
 # Canonical item-number → stimulus mapping (1-indexed)

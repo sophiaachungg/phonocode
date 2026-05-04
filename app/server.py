@@ -73,7 +73,7 @@ PROJECT_ROOT = Path(__file__).parent.parent
 DATA_ROOT = PROJECT_ROOT / "data" / "processed"
 LOGS_ROOT = PROJECT_ROOT / "logs"
 MODEL_ROOT = PROJECT_ROOT / "models"
-REF_ROOT = PROJECT_ROOT / "data" / "references"
+REF_ROOT = PROJECT_ROOT / "data" / "reference_recordings"
 
 # Task configuration — no ground truth CSVs. Word lists live in each
 # inference module. Model paths point to the final production checkpoints.

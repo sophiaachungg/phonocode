@@ -67,8 +67,8 @@ from tqdm import tqdm
 # Configuration
 # ---------------------------------------------------------------------------
 TARGET_SR             = 16000
-DEFAULT_OUTPUT_DIR    = Path("../data_processed/naart")
-DEFAULT_GROUND_TRUTH  = Path("ground_truth_naart.csv")
+DEFAULT_OUTPUT_DIR    = Path("../data/processed/naart")
+DEFAULT_GROUND_TRUTH  = Path("../data/raw/naart.csv")
 EXPECTED_N_TRIALS     = 61
 
 # Canonical item-number → stimulus mapping (1-indexed, fixed NAART order)

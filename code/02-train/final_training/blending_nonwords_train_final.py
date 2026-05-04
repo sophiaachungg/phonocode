@@ -64,8 +64,8 @@ from transformers import AutoFeatureExtractor, AutoModel
 # ---------------------------------------------------------------------------
 # CONFIG — must match Stage 2 exactly so features are comparable
 # ---------------------------------------------------------------------------
-AUDIO_ROOT       = Path("../data_processed/blending_nonwords")
-REF_ROOT         = Path("../reference_recordings/blending_nonwords")
+AUDIO_ROOT       = Path("../data/processed/blending_nonwords")
+REF_ROOT         = Path("../data/reference_recordings/blending_nonwords")
 GROUND_TRUTH_CSV = Path("../scoring/blending_nonwords_ground_truth.csv")
 OUTPUT_DIR       = Path("../results_bn_final_lr")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)

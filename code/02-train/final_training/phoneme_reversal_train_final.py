@@ -51,7 +51,7 @@ from sklearn.metrics import balanced_accuracy_score
 import torchaudio.functional as TAF
 
 # ---------- CONFIG ----------
-AUDIO_ROOT       = Path("../data_processed/phoneme_reversal")
+AUDIO_ROOT       = Path("../data/processed/phoneme_reversal")
 GROUND_TRUTH_CSV = Path("../scoring/phoneme_reversal_ground_truth.csv")
 
 MODEL_ID    = "facebook/wav2vec2-base-960h"
