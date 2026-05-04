@@ -314,24 +314,22 @@ The ground truth labels (correct / incorrect per participant × stimulus) were m
 ## Installation
 
 ```bash
+# 1. Clone the repo
 git clone https://github.com/sophiaachungg/phonocode.git
 cd phonocode
+
+# 2. Create a clean environment (do this once)
+conda create -n phonocode python=3.12
+conda activate phonocode
+
+# 3. Install dependencies
 pip install -r requirements.txt
-```
 
-**Core dependencies:**
+# 4. Launch the app
+cd app
+uvicorn server:app --port 8000
 
-```
-torch
-torchaudio
-transformers
-librosa
-scikit-learn
-pandas
-numpy
-matplotlib
-soundfile
-tqdm
+# 5. Open browser to http://localhost:8000
 ```
 
 ---
