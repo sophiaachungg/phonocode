@@ -19,23 +19,23 @@ Directory layout expected relative to this file:
         naart_final_model.pt
         blending_nonwords_lr_production_model.pkl
 
-    reference_recordings/
-        blending_nonwords/
-            lander.wav
-            jad.wav
-            ...  (24 files, one per stimulus)
-
-    data_processed/
-        phoneme_reversal/
-            ReXa_090/
-                ReXa_090_01_an.wav
-                ...
-        naart/
-            ReXa_090/
-                ...
-        blending_nonwords/
-            ReXa_090/
-                ...
+    data/
+        reference_recordings/
+            blending_nonwords/
+                lander.wav
+                jad.wav
+                ...  (24 files, one per stimulus)
+        processed/
+            phoneme_reversal/
+                ReXa_090/
+                    ReXa_090_01_an.wav
+                    ...
+            naart/
+                ReXa_090/
+                    ...
+            blending_nonwords/
+                ReXa_090/
+                    ...
 
     logs/                       ← created automatically on first submit
 
@@ -352,8 +352,8 @@ def submit_scores(req: SubmitRequest):
 
     clean_scores = {k: v for k, v in req.scores.items() if not k.endswith("_confidence")}
 
-    ra_row   = {"timestamp": timestamp, "ra": ra, "participant_id": pid, **clean_scores}
-    task_row = {"participant_id": pid, **clean_scores}
+    ra_row   = {"participant_id": pid, "ra": ra, "timestamp": timestamp, **clean_scores}
+    task_row = {"participant_id": pid, "ra": ra, **clean_scores}
 
     _append_csv(LOGS_ROOT / f"ra_{ra}_{task}.csv", ra_row)
     _append_csv(LOGS_ROOT / f"task_{task}.csv",    task_row)
