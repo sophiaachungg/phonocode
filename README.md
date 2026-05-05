@@ -355,6 +355,15 @@ phonocode/
 │   ├── blending-nonwords_final_model.pkl
 │   ├── naart_final_model.pt
 │   └── phoneme-reversal_final_model.pt
+├── results/
+│   ├── experiment_5foldcv/         ← results from 5-fold cross-validation training
+│   └── final_training/             ← results from final training
+├── scoring/                        ← merged ground truth from RA score sheets, used ground truth labels for training
+│   ├── blending_nonwords_ground_truth.csv 
+│   ├── naart_ground_truth.csv
+│   └── phoneme_reversal_ground_truth.csv
+├── index.html                      ← re-routes index.html to app/static/index.html
+├── requirements.txt                ← list of required packages for app installation
 └── README.md
 ```
 
