@@ -177,14 +177,16 @@ Not all stimuli are equally informative. Stimuli vary in phonological complexity
 
 ## Audio Preprocessing
 
-All raw audio goes through a standardized preprocessing pipeline before embedding extraction. Raw recordings are collected as `.webm` files and converted to `.wav` using FFmpeg:
+All raw audio goes through a standardized preprocessing pipeline before embedding extraction. Raw recordings are collected as base64 from Gorilla and converted to `.wav` using FFmpeg:
 
 - **Format:** WAV
 - **Sample rate:** 16,000 Hz (required by both Wav2Vec 2.0 and WavLM)
 - **Channels:** Mono
-- **Tool:** FFmpeg via `preprocess_audio.py`
+- **Tool:** FFmpeg via the .py in `code/01-preprocess_audio/`
 
 The script validates each output file (sample rate, channel count, non-zero frame count) and skips files that already pass validation unless `--force` is specified.
+
+An older script `preprocess_audio.py` is also included for reference. This old version converted from `.webm` to `.wav` because the Gorilla base64 exports were already converted to `.webm`.
 
 **Basic usage:**
 
