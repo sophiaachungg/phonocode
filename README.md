@@ -18,8 +18,8 @@ PhonoCode currently supports three tasks: **phoneme reversal**, **NAART**, and *
 - [Audio Preprocessing](#audio-preprocessing)
 - [Model Performance](#model-performance)
 - [Data](#data)
-- [Installation](#installation)
 - [Repository Structure](#repository-structure)
+- [Installation](#installation)
 - [Usage](#usage)
 
 ---
@@ -311,29 +311,6 @@ The ground truth labels (correct / incorrect per participant × stimulus) were m
 
 ---
 
-## Installation
-
-```bash
-# 1. Clone the repo
-git clone https://github.com/sophiaachungg/phonocode.git
-cd phonocode
-
-# 2. Create a clean environment (do this once)
-conda create -n phonocode python=3.12
-conda activate phonocode
-
-# 3. Install dependencies
-pip install -r requirements.txt
-
-# 4. Launch the app
-cd app
-uvicorn server:app --port 8000
-
-# 5. Open browser to http://localhost:8000
-```
-
----
-
 ## Repository Structure
 
 ```
@@ -383,13 +360,67 @@ phonocode/
 
 ---
 
+## Installation
+
+```bash
+# 1. Clone the repo
+git clone https://github.com/sophiaachungg/phonocode.git
+cd phonocode
+
+# 2. Create a clean environment (do this once)
+# This step assumes you already have Anaconda installed on your device.
+conda create -n phonocode python=3.12
+conda activate phonocode
+
+# 3. Install dependencies
+pip install -r requirements.txt
+# With package updates happening over time, there might be conflicts in the dependencies.
+# Feel free to use an LLM to assist with resolving these dependencies.
+# You can also make a pull request regarding this, and I can update as needed.
+
+# 4. Launch the app
+cd app
+uvicorn server:app --port 8000
+
+# 5. Open browser to http://localhost:8000
+```
+
+---
+
 ## Usage
+
+### Using the model + UI on new participant data
 
 **Step 1: Preprocess audio**
 
 ```bash
-python preprocess_audio.py ../data_raw/<task> --recursive
+python blending-nonwords_from_csv.py ../data/raw/<csv_from_Gorilla>
+python naart_from_csv.py ../data/raw/<csv_from_Gorilla>
 ```
+
+Check the docstring in each script for specific commands.
+
+**Step 2: Install and launch app**
+
+Ensure steps from [Installation](#installation) are complete first.
+
+```bash
+# Launch the app
+cd app
+uvicorn server:app --port 8000
+
+# Open browser to http://localhost:8000
+```
+
+### Re-training the models
+
+**Step 1: Preprocess audio**
+
+```bash
+python preprocess_audio.py ../data/raw/<task> --recursive
+```
+
+Ensure that your ground truth data is in `/scoring/`
 
 **Step 2: Run cross-validation training**
 
@@ -401,10 +432,12 @@ python naart_train.py
 
 For blending nonwords (WavLM similarity + LR pipeline):
 ```bash
-python bn_stage2_wavlm_similarity.py
+python blending-nonwords_train.py
 ```
 
 Results are saved to the corresponding `../results_<task>/` directory, including per-fold learning curves, confusion matrices, test predictions (with class-1 probabilities), and an aggregate summary.
+
+I used Vanderbilt's ACCRE system to train the models. Reach out for more information regarding the SLURM scripts and the overall batch job processing pipeline.
 
 **Step 3: Train final production models**
 
